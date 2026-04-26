@@ -5,12 +5,13 @@ import { useI18n } from '@/i18n'
 
 const { labels, locale, text } = useI18n()
 const roster = computed(() => characters.map((character) => ({ character, traits: character.traits[locale.value] })))
+const rosterEyebrow = computed(() => labels.value.rosterEyebrow.replace('{characters}', String(characters.length)))
 </script>
 
 <template>
   <section class="roster-layout">
     <div class="section-heading">
-      <p class="eyebrow">{{ labels.rosterEyebrow }}</p>
+      <p class="eyebrow">{{ rosterEyebrow }}</p>
       <h1>{{ labels.rosterTitle }}</h1>
       <p>{{ labels.disclaimer }}</p>
     </div>

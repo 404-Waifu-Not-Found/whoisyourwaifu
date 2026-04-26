@@ -1,4 +1,5 @@
 import type { Axis, Character, WaifuType } from '@/types'
+import { acgtiCharacters } from '@/data/acgtiCharacters'
 
 const typeOrder: Axis[] = ['E_I', 'S_N', 'T_F', 'J_P']
 const portraitSource = 'MyAnimeList'
@@ -324,7 +325,7 @@ function character(
   }
 }
 
-export const characters: Character[] = [
+const starterCharacters: Character[] = [
   character('kaguya-shinomiya', 'Kaguya Shinomiya', '四宫辉夜', 'Kaguya-sama: Love Is War', 'INTJ', ['Strategic', 'Proud', 'Secretly soft'], ['高智商', '傲娇', '暗藏柔软'], 'Your ideal route is a chess match where every move is flirting and nobody admits it first.', '你的理想路线是一场恋爱棋局：每一步都在调情，但谁也不先承认。', 'rose'),
   character('yukino-yukinoshita', 'Yukino Yukinoshita', '雪之下雪乃', 'My Teen Romantic Comedy SNAFU', 'INTJ', ['Precise', 'Principled', 'Hard to impress'], ['精准', '有原则', '很难攻略'], 'You like elegance with edges, the kind that critiques your life and somehow improves it.', '你喜欢带锋芒的优雅：她会吐槽你的人生，然后真的让它变好。', 'ice', 65),
   character('frieren', 'Frieren', '芙莉莲', 'Frieren: Beyond Journey’s End', 'INTP', ['Ancient calm', 'Curious', 'Deadpan'], ['古老淡定', '好奇', '冷面吐槽'], 'Your heart wants quiet mystery, tiny expressions, and feelings that arrive three episodes later.', '你的心想要安静的神秘感、小表情，以及三集之后才补上的情绪回响。', 'mint'),
@@ -374,3 +375,5 @@ export const characters: Character[] = [
   character('ryuko-matoi', 'Ryuko Matoi', '缠流子', 'Kill la Kill', 'ESTP', ['Rebellious', 'Direct', 'Explosive'], ['叛逆', '直球', '爆发力'], 'Your match is raw momentum, zero patience, and the kind of entrance that damages scenery.', '你的匹配结果是纯粹冲劲、零耐心，以及会破坏布景的登场方式。', 'crimson', 70),
   character('misa-amane', 'Misa Amane', '弥海砂', 'Death Note', 'ESFP', ['Dramatic', 'Devoted', 'Spotlight-ready'], ['戏剧化', '投入', '聚光灯体质'], 'You want big feelings, camera-ready chaos, and affection with dangerous production value.', '你想要大份情绪、镜头感混沌，以及制作规格很危险的好感。', 'magenta', 66),
 ]
+
+export const characters: Character[] = [...starterCharacters, ...acgtiCharacters]
