@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="18" fill="#201a1c"/>
+  <rect x="10" y="10" width="108" height="108" rx="12" fill="#e84f4f"/>
+  <path d="M22 88V35h14v41h21v12H22Zm40 0V35h24c13 0 21 7 21 19 0 12-8 20-22 20h-9v14H62Zm14-26h8c6 0 9-3 9-8s-3-8-9-8h-8v16Z" fill="#fffaf5"/>
+  <path d="M22 101h84v9H22v-9Z" fill="#fffaf5"/>
+  <text x="64" y="31" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="900" fill="#fffaf5">LPTI</text>
+</svg>
