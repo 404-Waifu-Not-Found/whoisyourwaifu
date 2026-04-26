@@ -22,14 +22,14 @@ const { labels } = useI18n()
       </div>
       <p class="disclaimer">{{ labels.disclaimer }}</p>
     </div>
-    <div class="poster-panel" aria-label="Quiz preview">
+    <div class="poster-panel" :aria-label="labels.quizPreview">
       <div class="poster-grid">
         <span>INTJ</span>
         <span>ENFP</span>
         <span>ISFJ</span>
         <span>ESTP</span>
       </div>
-      <div class="poster-title">WAIFU MATCH ENGINE</div>
+      <div class="poster-title">{{ labels.posterTitle }}</div>
       <div class="poster-meter">
         <span />
         <span />

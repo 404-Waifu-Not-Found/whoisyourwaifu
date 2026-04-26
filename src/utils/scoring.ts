@@ -45,6 +45,12 @@ export function analyzeAnswers(answers: AnswerMap, selectedQuestions: Question[]
   const totals = Object.fromEntries(axes.map((axis) => [axis, 0])) as Record<Axis, number>
   const maximums = Object.fromEntries(axes.map((axis) => [axis, 0])) as Record<Axis, number>
   const evidence = Object.fromEntries(axes.map((axis) => [axis, 0])) as Record<Axis, number>
+  const signedEvidence: Record<Axis, number[]> = {
+    E_I: [],
+    S_N: [],
+    T_F: [],
+    J_P: [],
+  }
 
   for (const question of selectedQuestions) {
     const answer = answers[question.id] ?? 0
@@ -53,6 +59,7 @@ export function analyzeAnswers(answers: AnswerMap, selectedQuestions: Question[]
     totals[question.axis] += answer * question.weight * sign
     maximums[question.axis] += 3 * question.weight
     evidence[question.axis] += Math.abs(answer) * question.weight
+    signedEvidence[question.axis].push(answer * sign)
   }
 
   const scores = Object.fromEntries(
@@ -67,7 +74,11 @@ export function analyzeAnswers(answers: AnswerMap, selectedQuestions: Question[]
       const max = maximums[axis] || 1
       const answerStrength = evidence[axis] / max
       const directionalClarity = Math.abs(totals[axis]) / max
-      return [axis, Math.round(clamp(answerStrength * 0.45 + directionalClarity * 0.55, 0, 1) * 100)]
+      const nonNeutral = signedEvidence[axis].filter((value) => value !== 0)
+      const positive = nonNeutral.filter((value) => value > 0).length
+      const negative = nonNeutral.filter((value) => value < 0).length
+      const consistency = nonNeutral.length === 0 ? 0 : Math.abs(positive - negative) / nonNeutral.length
+      return [axis, Math.round(clamp(answerStrength * 0.3 + directionalClarity * 0.45 + consistency * 0.25, 0, 1) * 100)]
     }),
   ) as Record<Axis, number>
 
@@ -147,6 +158,12 @@ function typeMatchFrom(character: Character, derivedType: WaifuType): number {
   return Math.round((matches / axes.length) * 100)
 }
 
+function displayedFit(rawFit: number, confidence: number): number {
+  const blended = Math.round(rawFit * 0.72 + confidence * 0.28)
+  const confidenceCap = confidence < 20 ? 58 + confidence : confidence < 45 ? 70 + Math.round(confidence / 3) : 100
+  return Math.min(blended, confidenceCap)
+}
+
 export function rankCharacters(profile: ScoringProfile, selectedQuestions: Question[] = questions): CharacterMatch[] {
   const derivedType = typeFromScores(profile.scores)
 
@@ -157,7 +174,7 @@ export function rankCharacters(profile: ScoringProfile, selectedQuestions: Quest
       return {
         character,
         distance: Math.round(matchDistance),
-        fit: Math.round(rawFit * 0.72 + profile.confidence * 0.28),
+        fit: displayedFit(rawFit, profile.confidence),
         typeMatch: typeMatchFrom(character, derivedType),
       }
     })

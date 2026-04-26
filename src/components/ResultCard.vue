@@ -30,7 +30,7 @@ const traits = computed(() => props.result.character.traits[locale.value])
       </div>
       <div>
         <h1>{{ text(result.character.name) }}</h1>
-        <p>{{ result.character.source }}</p>
+        <p>{{ text(result.character.source) }}</p>
         <a
           v-if="result.character.portrait"
           class="source-link"
@@ -38,7 +38,7 @@ const traits = computed(() => props.result.character.traits[locale.value])
           target="_blank"
           rel="noreferrer"
         >
-          Art source: {{ result.character.portrait.sourceName }}
+          {{ labels.artSource }}: {{ result.character.portrait.sourceName }}
         </a>
       </div>
     </div>

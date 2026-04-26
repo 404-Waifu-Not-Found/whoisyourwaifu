@@ -2,6 +2,44 @@ import type { Axis, Character, WaifuType } from '@/types'
 
 const typeOrder: Axis[] = ['E_I', 'S_N', 'T_F', 'J_P']
 const portraitSource = 'MyAnimeList'
+const sourceTranslations: Record<string, string> = {
+  'Kaguya-sama: Love Is War': '辉夜大小姐想让我告白',
+  'My Teen Romantic Comedy SNAFU': '我的青春恋爱物语果然有问题',
+  'Frieren: Beyond Journey’s End': '葬送的芙莉莲',
+  'Steins;Gate': '命运石之门',
+  'Fate/stay night': 'Fate/stay night',
+  'Chainsaw Man': '电锯人',
+  'Spice and Wolf': '狼与香辛料',
+  KonoSuba: '为美好的世界献上祝福！',
+  'Violet Evergarden': '紫罗兰永恒花园',
+  'Puella Magi Madoka Magica': '魔法少女小圆',
+  'The Quintessential Quintuplets': '五等分的新娘',
+  'Love, Chunibyo & Other Delusions': '中二病也要谈恋爱！',
+  'Sword Art Online': '刀剑神域',
+  'Demon Slayer': '鬼灭之刃',
+  'My Dress-Up Darling': '更衣人偶坠入爱河',
+  'Attack on Titan': '进击的巨人',
+  'Re:Zero': 'Re:从零开始的异世界生活',
+  'Spy x Family': '间谍过家家',
+  'A Certain Scientific Railgun': '某科学的超电磁炮',
+  'Fairy Tail': '妖精的尾巴',
+  'Fruits Basket': '水果篮子',
+  'Fullmetal Alchemist': '钢之炼金术师',
+  'Black Lagoon': '黑礁',
+  'Jujutsu Kaisen': '咒术回战',
+  'Darling in the Franxx': 'DARLING in the FRANXX',
+  'A Silent Voice': '声之形',
+  Bleach: '死神',
+  'Akame ga Kill!': '斩！赤红之瞳',
+  'The Melancholy of Haruhi Suzumiya': '凉宫春日的忧郁',
+  'Kill la Kill': '斩服少女',
+  'Bocchi the Rock!': '孤独摇滚！',
+  'K-On!': '轻音少女',
+  Naruto: '火影忍者',
+  "Miss Kobayashi's Dragon Maid": '小林家的龙女仆',
+  'Ghost in the Shell': '攻壳机动队',
+  'Death Note': '死亡笔记',
+}
 
 const portraits: Record<string, NonNullable<Character['portrait']>> = {
   'kaguya-shinomiya': {
@@ -276,7 +314,7 @@ function character(
   return {
     id,
     name: { en: name, zh: zhName },
-    source,
+    source: { en: source, zh: sourceTranslations[source] ?? source },
     type,
     portrait: portraits[id],
     axisVector,

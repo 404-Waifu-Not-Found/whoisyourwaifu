@@ -49,6 +49,10 @@ npm run evaluate
 
 `npm run evaluate` 会生成假的答题输入，并对评分结果做基础对比检查。
 
+## 算法说明
+
+评分算法文档见：[ALGORITHM.md](./ALGORITHM.md)
+
 ## GitHub Pages
 
 项目的 Vite 配置使用：

@@ -47,6 +47,10 @@ npm run evaluate
 
 `npm run evaluate` 会生成假的答题输入，并对评分结果做基础对比检查。
 
+## 算法说明
+
+评分算法文档见：[docs/ALGORITHM.md](./docs/ALGORITHM.md)
+
 ## GitHub Pages
 
 `.github/workflows/deploy.yml` 会构建 `dist/` 并通过 GitHub Pages Actions 部署。仓库设置里需要把 Pages 来源设置为 **GitHub Actions**。

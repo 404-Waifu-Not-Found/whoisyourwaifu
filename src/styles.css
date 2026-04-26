@@ -690,6 +690,226 @@ main {
   gap: 16px;
 }
 
+.contributors-layout {
+  width: min(980px, 100%);
+  margin: 0 auto;
+}
+
+.contributor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 26px 0;
+}
+
+.contributor-list {
+  display: grid;
+  gap: 14px;
+}
+
+.creator-card {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  align-items: center;
+  gap: 18px;
+  margin: 0 0 22px;
+  padding: 18px;
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fffaf5, #ffe061 140%);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.creator-card img {
+  width: 92px;
+  height: 92px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.creator-card span {
+  color: var(--coral);
+  font-size: 0.85rem;
+  font-weight: 1000;
+}
+
+.creator-card h2,
+.creator-card p {
+  margin: 0;
+}
+
+.creator-card h2 {
+  margin-top: 4px;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  line-height: 1;
+}
+
+.creator-card p {
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.contributor-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.35fr) 1fr;
+  gap: 18px;
+  padding: 18px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.contributor-row h2,
+.contributor-row p {
+  margin: 0;
+}
+
+.contributor-row h2 {
+  font-size: 1.2rem;
+}
+
+.contributor-row p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.paper-layout {
+  width: min(900px, 100%);
+  margin: 0 auto;
+  padding: clamp(22px, 5vw, 52px);
+  border: 1px solid #cfc3ba;
+  background: #fffdf8;
+  box-shadow: 0 20px 60px rgb(32 26 28 / 10%);
+  color: #1f1a18;
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
+}
+
+.paper-header {
+  padding-bottom: 24px;
+  border-bottom: 1px solid #cfc3ba;
+  text-align: center;
+}
+
+.paper-kicker {
+  margin: 0 0 14px;
+  color: #7b2f2f;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.paper-header h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 5vw, 4rem);
+  line-height: 1.05;
+}
+
+.paper-abstract {
+  max-width: 720px;
+  margin: 20px auto 0;
+  color: #4c4642;
+  font-size: 1.08rem;
+  line-height: 1.8;
+  text-align: left;
+}
+
+.paper-section {
+  margin-top: 34px;
+}
+
+.paper-section h2 {
+  margin: 0 0 12px;
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+}
+
+.paper-section p {
+  margin: 12px 0;
+  color: #4c4642;
+  font-size: 1.02rem;
+  line-height: 1.85;
+}
+
+.paper-equation {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0;
+  padding: 16px 18px;
+  border-left: 4px solid #7b2f2f;
+  background: #f7efe7;
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.paper-figure {
+  margin: 22px 0;
+  padding: 14px;
+  border: 1px solid #d8ccc2;
+  background: #fffaf2;
+}
+
+.paper-figure svg {
+  width: 100%;
+  height: auto;
+  color: #201a1c;
+}
+
+.paper-figure line,
+.paper-figure .flow path {
+  stroke: #4c4642;
+  stroke-width: 3;
+  fill: none;
+}
+
+.paper-figure .bars rect,
+.paper-figure .flow rect {
+  fill: #e8d5c8;
+  stroke: #201a1c;
+  stroke-width: 2;
+}
+
+.paper-figure .radar-grid {
+  fill: none;
+  stroke: #bba99d;
+  stroke-width: 2;
+}
+
+.paper-figure .radar-fill {
+  fill: rgb(232 79 79 / 28%);
+  stroke: #7b2f2f;
+  stroke-width: 4;
+}
+
+.paper-figure circle {
+  fill: #7b2f2f;
+}
+
+.paper-figure marker path {
+  fill: #4c4642;
+}
+
+.paper-labels text,
+.paper-figure .flow text {
+  fill: #201a1c;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  text-anchor: middle;
+}
+
+.paper-figure figcaption {
+  margin-top: 8px;
+  color: #6d625b;
+  font-size: 0.9rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
 .roster-card {
   position: relative;
   min-height: 220px;
@@ -756,6 +976,13 @@ main {
   align-items: center;
   gap: 7px;
   color: var(--ink);
+}
+
+.footer-link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 .github-link svg {
@@ -875,6 +1102,19 @@ main {
   .close-match-grid,
   .score-strip {
     grid-template-columns: 1fr;
+  }
+
+  .contributor-row {
+    grid-template-columns: 1fr;
+  }
+
+  .creator-card {
+    grid-template-columns: 72px 1fr;
+  }
+
+  .creator-card img {
+    width: 72px;
+    height: 72px;
   }
 
   .result-identity {

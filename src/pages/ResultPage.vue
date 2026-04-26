@@ -51,7 +51,7 @@ function retake() {
           />
           <div>
             <strong>{{ text(match.character.name) }}</strong>
-            <span>{{ match.character.type }} · {{ match.fit }}%</span>
+            <span>{{ text(match.character.source) }} · {{ match.character.type }} · {{ match.fit }}%</span>
           </div>
         </article>
       </div>

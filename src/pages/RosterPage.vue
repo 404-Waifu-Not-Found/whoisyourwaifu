@@ -30,7 +30,7 @@ const roster = computed(() => characters.map((character) => ({ character, traits
         />
         <div class="roster-type">{{ character.type }}</div>
         <h2>{{ text(character.name) }}</h2>
-        <p>{{ character.source }}</p>
+        <p>{{ text(character.source) }}</p>
         <div class="trait-row">
           <span v-for="trait in traits" :key="trait">{{ trait }}</span>
         </div>

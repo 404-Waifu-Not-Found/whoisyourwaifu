@@ -36,7 +36,7 @@ export interface Question {
 export interface Character {
   id: string
   name: LocalizedText
-  source: string
+  source: LocalizedText
   type: WaifuType
   portrait?: {
     url: string

@@ -49,6 +49,10 @@ npm run evaluate
 
 `npm run evaluate` generates fake answer profiles and compares scoring outputs for sanity checks.
 
+## Algorithm
+
+See the scoring paper-style documentation: [ALGORITHM.md](./ALGORITHM.md)
+
 ## GitHub Pages
 
 The app uses Vite with:
