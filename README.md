@@ -33,7 +33,7 @@ LPTI 是一个静态双语二次元老婆偏好测试，使用 Vue 3、TypeScrip
 默认本地地址：
 
 ```text
-http://127.0.0.1:4173/whoisyourwaifu/
+http://127.0.0.1:4173/
 ```
 
 ## 开发命令

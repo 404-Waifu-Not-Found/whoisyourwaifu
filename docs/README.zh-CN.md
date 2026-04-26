@@ -35,7 +35,7 @@ LPTI 是一个静态双语二次元老婆偏好测试，使用 Vue 3、TypeScrip
 默认本地地址：
 
 ```text
-http://127.0.0.1:4173/whoisyourwaifu/
+http://127.0.0.1:4173/
 ```
 
 ## 开发命令
@@ -54,10 +54,10 @@ npm run evaluate
 项目的 Vite 配置使用：
 
 ```ts
-base: '/whoisyourwaifu/'
+base: '/'
 ```
 
-`.github/workflows/deploy.yml` 会构建 `dist/` 并通过 GitHub Pages Actions 部署。仓库设置里需要把 Pages 来源设置为 **GitHub Actions**。
+`.github/workflows/deploy.yml` 会构建 `dist/` 并通过 GitHub Pages Actions 部署。仓库设置里需要把 Pages 来源设置为 **GitHub Actions**，自定义域名使用 `waifu.ccwu.cc`。
 
 ## 翻译贡献
 

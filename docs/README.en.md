@@ -35,7 +35,7 @@ Use another port:
 Default local URL:
 
 ```text
-http://127.0.0.1:4173/whoisyourwaifu/
+http://127.0.0.1:4173/
 ```
 
 ## Development
@@ -54,10 +54,10 @@ npm run evaluate
 The app uses Vite with:
 
 ```ts
-base: '/whoisyourwaifu/'
+base: '/'
 ```
 
-The workflow in `.github/workflows/deploy.yml` builds `dist/` and deploys through GitHub Pages Actions. In the repository settings, set Pages source to **GitHub Actions**.
+The workflow in `.github/workflows/deploy.yml` builds `dist/` and deploys through GitHub Pages Actions. In the repository settings, set Pages source to **GitHub Actions** and use the custom domain `waifu.ccwu.cc`.
 
 ## Translation Contributions
 

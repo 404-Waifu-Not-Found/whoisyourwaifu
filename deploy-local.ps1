@@ -89,5 +89,5 @@ Write-Step "Build ready"
 Write-Host "Static files: $RepoRoot\dist" -ForegroundColor Green
 
 Write-Step "Starting local static preview"
-Write-Host "Open: http://127.0.0.1:$PreviewPort/whoisyourwaifu/" -ForegroundColor Green
+Write-Host "Open: http://127.0.0.1:$PreviewPort/" -ForegroundColor Green
 Invoke-Native $Npm @("run", "preview", "--", "--host", "127.0.0.1", "--port", "$PreviewPort")
