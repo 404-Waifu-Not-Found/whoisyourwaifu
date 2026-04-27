@@ -369,9 +369,9 @@ const portraits: Record<string, NonNullable<Character['portrait']>> = {
     sourceUrl: 'https://myanimelist.net/character/24891/Cirno',
   },
   'elaina': {
-    url: 'https://myanimelist.net/images/characters/7/449163.jpg',
-    sourceName: portraitSource,
-    sourceUrl: 'https://myanimelist.net/character/199593/Elaina',
+    url: 'https://lain.bgm.tv/pic/crt/l/35/0e/72355_crt_6Z6zM.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/72355',
   },
   'elysia': {
     url: 'https://myanimelist.net/images/characters/4/501079.jpg',
@@ -404,9 +404,9 @@ const portraits: Record<string, NonNullable<Character['portrait']>> = {
     sourceUrl: 'https://myanimelist.net/character/5443/Reimu_Hakurei',
   },
   'hatsune-miku': {
-    url: 'https://myanimelist.net/images/characters/15/356707.jpg',
-    sourceName: portraitSource,
-    sourceUrl: 'https://myanimelist.net/character/161342/Miku_Hatsune',
+    url: 'https://lain.bgm.tv/pic/crt/l/00/71/10452_crt_UusO7.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/10452',
   },
   'hoshino-ruby': {
     url: 'https://myanimelist.net/images/characters/5/496454.jpg',
@@ -432,6 +432,11 @@ const portraits: Record<string, NonNullable<Character['portrait']>> = {
     url: 'https://myanimelist.net/images/characters/2/35115.jpg',
     sourceName: portraitSource,
     sourceUrl: 'https://myanimelist.net/character/9272/Rin_Kagamine',
+  },
+  'kaguya-chojikuu': {
+    url: 'https://lain.bgm.tv/pic/crt/l/ef/3e/189813_crt_5vuz4.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/189813',
   },
   'kaltsit': {
     url: 'https://myanimelist.net/images/characters/8/493343.jpg',
@@ -509,9 +514,9 @@ const portraits: Record<string, NonNullable<Character['portrait']>> = {
     sourceUrl: 'https://myanimelist.net/character/231742/Mutsumi_Wakaba',
   },
   'murasame': {
-    url: 'https://myanimelist.net/images/characters/8/195079.jpg',
-    sourceName: portraitSource,
-    sourceUrl: 'https://myanimelist.net/character/76930/Murasame',
+    url: 'https://lain.bgm.tv/pic/crt/l/6f/34/39362_crt_oM36R.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/39362',
   },
   'nagasaki-soyo': {
     url: 'https://myanimelist.net/images/characters/7/512381.jpg',
