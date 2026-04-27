@@ -2,6 +2,7 @@ import type { Axis, Character, WaifuType } from '@/types'
 
 const typeOrder: Axis[] = ['E_I', 'S_N', 'T_F', 'J_P']
 const portraitSource = 'MyAnimeList'
+const bangumiPortraitSource = 'Bangumi'
 const sourceTranslations: Record<string, string> = {
   'Kaguya-sama: Love Is War': '辉夜大小姐想让我告白',
   'My Teen Romantic Comedy SNAFU': '我的青春恋爱物语果然有问题',
@@ -651,6 +652,76 @@ const portraits: Record<string, NonNullable<Character['portrait']>> = {
     url: 'https://myanimelist.net/images/characters/2/332632.jpg',
     sourceName: portraitSource,
     sourceUrl: 'https://myanimelist.net/character/67069/Yui_Yuigahama',
+  },
+  'azuma-seren': {
+    url: 'https://lain.bgm.tv/pic/crt/l/30/d3/105455_crt_1IE41.jpg?r=1683616907',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/105455',
+  },
+  'bilibili-22': {
+    url: 'https://lain.bgm.tv/pic/crt/l/95/f7/10849_crt_K2kv5.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/10849',
+  },
+  'bilibili-33': {
+    url: 'https://lain.bgm.tv/pic/crt/l/70/56/10850_crt_54r65.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/10850',
+  },
+  'doro': {
+    url: 'https://lain.bgm.tv/pic/crt/l/60/39/180752_crt_5yZmw.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/180752',
+  },
+  'eis-taffy': {
+    url: 'https://lain.bgm.tv/pic/crt/l/80/dc/108078_crt_9fyJP.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/108078',
+  },
+  'evil-neuro': {
+    url: 'https://lain.bgm.tv/pic/crt/l/dc/8c/178377_crt_Hu4eH.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/178377',
+  },
+  'eyjafjalla': {
+    url: 'https://lain.bgm.tv/pic/crt/l/ec/1f/70408_crt_lYkaj.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/70408',
+  },
+  'jia-ran': {
+    url: 'https://lain.bgm.tv/pic/crt/l/11/72/96374_crt_zn9Nm.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/96374',
+  },
+  'myrtle': {
+    url: 'https://lain.bgm.tv/pic/crt/l/4b/80/71744_crt_f4Q21.jpg?r=1584949091',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/71744',
+  },
+  'neuro-sama': {
+    url: 'https://lain.bgm.tv/pic/crt/l/52/bf/124379_crt_v2etY.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/124379',
+  },
+  'tanikaze-amane': {
+    url: 'https://lain.bgm.tv/pic/crt/l/85/7b/121631_crt_at6PC.jpg?r=1670806019',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/121631',
+  },
+  'vertin': {
+    url: 'https://lain.bgm.tv/pic/crt/l/dc/17/130810_crt_nfMuf.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/130810',
+  },
+  'yo-rana': {
+    url: 'https://lain.bgm.tv/pic/crt/l/c2/a9/127792_crt_NN1tz.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/127792',
+  },
+  'uika-nyubara': {
+    url: 'https://lain.bgm.tv/pic/crt/l/ad/b9/133285_crt_sqqFJ.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/133285',
   },
 }
 
