@@ -33,7 +33,7 @@ export const questions: Question[] = [
     id: 'ei-03',
     axis: 'E_I',
     favoredPole: 'E',
-    weight: 1.1,
+    weight: 1.4,
     text: {
       en: 'You prefer the kind of waifu who turns “I have plans” into “our side quest starts now.”',
       zh: '你更吃那种把“我有安排”改写成“我们的支线现在开始”的二次元老婆。',
@@ -47,7 +47,7 @@ export const questions: Question[] = [
     id: 'ei-04',
     axis: 'E_I',
     favoredPole: 'I',
-    weight: 1.1,
+    weight: 1.4,
     text: {
       en: 'Your favorite romantic weapon is eye contact that needs its own wiki page.',
       zh: '你最喜欢的恋爱武器，是那种需要单独开百科页面的对视。',
@@ -61,7 +61,7 @@ export const questions: Question[] = [
     id: 'ei-05',
     axis: 'E_I',
     favoredPole: 'E',
-    weight: 0.9,
+    weight: 0.7,
     text: {
       en: 'You are weak to teasing so public the group chat starts typing “bro?” in real time.',
       zh: '你扛不住那种公开调侃到群聊现场刷“兄弟？”的展开。',
@@ -75,7 +75,7 @@ export const questions: Question[] = [
     id: 'ei-06',
     axis: 'E_I',
     favoredPole: 'I',
-    weight: 0.9,
+    weight: 0.7,
     text: {
       en: 'Your secret weakness is the “she only smiles like that around you” achievement.',
       zh: '你的隐藏弱点是“她只在你面前这样笑”这个成就。',
@@ -145,7 +145,7 @@ export const questions: Question[] = [
     id: 'ei-11',
     axis: 'E_I',
     favoredPole: 'E',
-    weight: 0.95,
+    weight: 0.9,
     text: {
       en: 'You enjoy a waifu who makes flirting feel like a public event with ticket sales.',
       zh: '你喜欢那种能把调情弄得像公开售票活动的二次元老婆。',
@@ -159,7 +159,7 @@ export const questions: Question[] = [
     id: 'ei-12',
     axis: 'E_I',
     favoredPole: 'I',
-    weight: 0.95,
+    weight: 0.9,
     text: {
       en: 'You prefer the “private route unlocked” vibe over fireworks-level attention.',
       zh: '比起烟花级关注，你更偏爱“私人路线已解锁”的感觉。',
@@ -201,7 +201,7 @@ export const questions: Question[] = [
     id: 'sn-03',
     axis: 'S_N',
     favoredPole: 'S',
-    weight: 1.1,
+    weight: 1.4,
     text: {
       en: 'A waifu who packs emergency snacks is hotter than any person with that much foresight should be.',
       zh: '会带应急零食的二次元老婆，理性上不该这么有魅力，但她就是有。',
@@ -215,7 +215,7 @@ export const questions: Question[] = [
     id: 'sn-04',
     axis: 'S_N',
     favoredPole: 'N',
-    weight: 1.1,
+    weight: 1.4,
     text: {
       en: 'You would rather have cursed destiny strings than a normal dating-app match.',
       zh: '比起正常匹配，你更想要那种像被命运线缠住的离谱展开。',
@@ -229,7 +229,7 @@ export const questions: Question[] = [
     id: 'sn-05',
     axis: 'S_N',
     favoredPole: 'S',
-    weight: 0.9,
+    weight: 0.7,
     text: {
       en: 'Your combat-type weakness is training arcs, not random plot fireworks.',
       zh: '你对战斗系的弱点是训练篇，不是剧情突然放烟花。',
@@ -243,7 +243,7 @@ export const questions: Question[] = [
     id: 'sn-06',
     axis: 'S_N',
     favoredPole: 'N',
-    weight: 0.9,
+    weight: 0.7,
     text: {
       en: 'You like the vibe that she has a secret final form in either magic, feelings, or tax fraud.',
       zh: '你喜欢她好像藏着最终形态：可能是魔法，可能是感情，也可能是奇怪的账本。',
@@ -313,7 +313,7 @@ export const questions: Question[] = [
     id: 'sn-11',
     axis: 'S_N',
     favoredPole: 'S',
-    weight: 0.95,
+    weight: 0.9,
     text: {
       en: 'A girl who solves real problems before making poetic speeches is dangerously underrated.',
       zh: '先解决现实问题再发表诗意发言的角色，危险地被低估了。',
@@ -327,7 +327,7 @@ export const questions: Question[] = [
     id: 'sn-12',
     axis: 'S_N',
     favoredPole: 'N',
-    weight: 0.95,
+    weight: 0.9,
     text: {
       en: 'You prefer the route where every repeated symbol makes your brain yell “foreshadowing.”',
       zh: '你偏爱那种每个重复符号都会让大脑喊“伏笔”的路线。',
@@ -369,7 +369,7 @@ export const questions: Question[] = [
     id: 'tf-03',
     axis: 'T_F',
     favoredPole: 'T',
-    weight: 1.1,
+    weight: 1.4,
     text: {
       en: 'Your suspiciously specific preference is “can make hard decisions without buffering.”',
       zh: '你很可疑的偏好是：“能做艰难决定，而且不会加载半天。”',
@@ -383,7 +383,7 @@ export const questions: Question[] = [
     id: 'tf-04',
     axis: 'T_F',
     favoredPole: 'F',
-    weight: 1.1,
+    weight: 1.4,
     text: {
       en: 'You want kindness so strong even the villain has to schedule personal growth.',
       zh: '你想要强到反派都得预约个人成长的温柔。',
@@ -397,7 +397,7 @@ export const questions: Question[] = [
     id: 'tf-05',
     axis: 'T_F',
     favoredPole: 'T',
-    weight: 0.9,
+    weight: 0.7,
     text: {
       en: 'You are into the “she planned this before you knew there was a this” archetype.',
       zh: '你吃的是“在你知道有这件事之前，她已经把这件事计划好了”的类型。',
@@ -411,7 +411,7 @@ export const questions: Question[] = [
     id: 'tf-06',
     axis: 'T_F',
     favoredPole: 'F',
-    weight: 0.9,
+    weight: 0.7,
     text: {
       en: 'You would trade the optimal strategy for one emotionally honest line delivered at 2 HP.',
       zh: '你愿意用最优策略换一句残血时说出来的真心话。',
@@ -481,7 +481,7 @@ export const questions: Question[] = [
     id: 'tf-11',
     axis: 'T_F',
     favoredPole: 'T',
-    weight: 0.95,
+    weight: 0.9,
     text: {
       en: 'You like the kind of woman whose calm “obviously” makes you question your whole build.',
       zh: '你喜欢那种她冷静说一句“这不是很明显吗”，就能让你怀疑整套配装的人。',
@@ -495,7 +495,7 @@ export const questions: Question[] = [
     id: 'tf-12',
     axis: 'T_F',
     favoredPole: 'F',
-    weight: 0.95,
+    weight: 0.9,
     text: {
       en: 'You want affection that arrives before you finish pretending you do not need it.',
       zh: '你想要那种在你装作不需要之前就已经抵达的关心。',
@@ -537,7 +537,7 @@ export const questions: Question[] = [
     id: 'jp-03',
     axis: 'J_P',
     favoredPole: 'J',
-    weight: 1.1,
+    weight: 1.4,
     text: {
       en: 'You think reliability is hot, which is how we know your standards survived the internet.',
       zh: '你觉得靠谱很性感，说明你的择偶标准居然挺过了互联网。',
@@ -551,7 +551,7 @@ export const questions: Question[] = [
     id: 'jp-04',
     axis: 'J_P',
     favoredPole: 'P',
-    weight: 1.1,
+    weight: 1.4,
     text: {
       en: 'You enjoy spontaneous chaos as long as she makes the bad idea look professionally directed.',
       zh: '只要她能把馊主意拍得像专业导演作品，你就能接受即兴混沌。',
@@ -565,7 +565,7 @@ export const questions: Question[] = [
     id: 'jp-05',
     axis: 'J_P',
     favoredPole: 'J',
-    weight: 0.9,
+    weight: 0.7,
     text: {
       en: 'Clear boundaries, high standards, suspiciously clean desk: yes, this is a type.',
       zh: '边界清晰、标准很高、桌面整洁得可疑：对，这也是一种XP。',
@@ -579,7 +579,7 @@ export const questions: Question[] = [
     id: 'jp-06',
     axis: 'J_P',
     favoredPole: 'P',
-    weight: 0.9,
+    weight: 0.7,
     text: {
       en: 'You like someone who can misplay, improvise, and somehow convince everyone it was tech.',
       zh: '你喜欢那种失误了、即兴了，还能让大家以为这是高级操作的人。',
@@ -649,7 +649,7 @@ export const questions: Question[] = [
     id: 'jp-11',
     axis: 'J_P',
     favoredPole: 'J',
-    weight: 0.95,
+    weight: 0.9,
     text: {
       en: 'A promise with timestamps, receipts, and follow-through hits your exact preference folder.',
       zh: '带时间戳、有凭证、还真的兑现的承诺，精准命中你的偏好文件夹。',
@@ -663,7 +663,7 @@ export const questions: Question[] = [
     id: 'jp-12',
     axis: 'J_P',
     favoredPole: 'P',
-    weight: 0.95,
+    weight: 0.9,
     text: {
       en: 'You enjoy the “bad idea, legendary memory” pipeline more than you should admit.',
       zh: '你比自己愿意承认的更喜欢“馊主意，传世回忆”这条流水线。',

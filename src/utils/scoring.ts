@@ -1,6 +1,16 @@
 import { characters } from '@/data/characters'
 import { questions } from '@/data/questions'
-import type { AnswerMap, Axis, AxisScore, Character, CharacterMatch, Pole, Question, QuizResult, WaifuType } from '@/types'
+import type {
+  AnswerMap,
+  Axis,
+  AxisScore,
+  Character,
+  CharacterMatch,
+  Pole,
+  Question,
+  QuizResult,
+  WaifuType,
+} from '@/types'
 
 export const axisPoles: Record<Axis, [Pole, Pole]> = {
   E_I: ['E', 'I'],
@@ -9,202 +19,248 @@ export const axisPoles: Record<Axis, [Pole, Pole]> = {
   J_P: ['J', 'P'],
 }
 
-const axes = Object.keys(axisPoles) as Axis[]
-const maxAxisDistance = axes.length * 200 * 200 * 2.1
+const AXES = Object.keys(axisPoles) as Axis[]
+
+function clamp(v: number, lo: number, hi: number): number {
+  return Math.max(lo, Math.min(hi, v))
+}
+
+function axisLetter(type: WaifuType, axis: Axis): Pole {
+  return type[AXES.indexOf(axis)] as Pole
+}
+
+// +1 if agreeing with this question pushes the user toward the right pole
+// (I/N/F/P), -1 if it pushes toward the left (E/S/T/J).
+function signTowardRight(question: Question): number {
+  const [, right] = axisPoles[question.axis]
+  return question.favoredPole === right ? 1 : -1
+}
+
+interface AxisStats {
+  score: number
+  confidence: number
+}
+
+function statsFor(axis: Axis, answers: AnswerMap, qs: Question[]): AxisStats {
+  let signedTotal = 0
+  let absTotal = 0
+  let weightTotal = 0
+
+  for (const q of qs) {
+    if (q.axis !== axis) continue
+    const a = answers[q.id]
+    if (typeof a !== 'number') continue
+    const w = q.weight
+    signedTotal += a * signTowardRight(q) * w
+    absTotal += Math.abs(a) * w
+    weightTotal += w
+  }
+
+  if (weightTotal === 0) return { score: 0, confidence: 0 }
+
+  const maxMagnitude = 3 * weightTotal
+  const score = clamp((signedTotal / maxMagnitude) * 100, -100, 100)
+
+  // Confidence is the geometric mean of two factors:
+  //   strength = how committed the answers were (avg |answer| / 3)
+  //   clarity  = how directionally consistent they were (|net| / sum |answer|)
+  // sqrt smooths the product so a strong-but-mixed reading still earns some signal.
+  const strength = absTotal / maxMagnitude
+  const clarity = absTotal === 0 ? 0 : Math.abs(signedTotal) / absTotal
+  const confidence = Math.sqrt(strength * clarity) * 100
+
+  return { score: Math.round(score), confidence: Math.round(confidence) }
+}
+
+interface Profile {
+  scores: Record<Axis, number>
+  confidenceByAxis: Record<Axis, number>
+  overallConfidence: number
+  type: WaifuType
+}
 
 export function emptyAnswers(): AnswerMap {
   return {}
 }
 
 export function isComplete(answers: AnswerMap): boolean {
-  return questions.every((question) => typeof answers[question.id] === 'number')
+  return questions.every((q) => typeof answers[q.id] === 'number')
 }
 
-export function isQuestionSetComplete(answers: AnswerMap, selectedQuestions: Question[]): boolean {
-  return selectedQuestions.every((question) => typeof answers[question.id] === 'number')
+export function isQuestionSetComplete(answers: AnswerMap, qs: Question[]): boolean {
+  return qs.every((q) => typeof answers[q.id] === 'number')
 }
 
-interface ScoringProfile {
-  answers: AnswerMap
-  scores: Record<Axis, number>
-  confidenceByAxis: Record<Axis, number>
-  importanceByAxis: Record<Axis, number>
-  confidence: number
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value))
-}
-
-function axisLetter(type: WaifuType, axis: Axis): Pole {
-  const index = axes.indexOf(axis)
-  return type[index] as Pole
-}
-
-export function analyzeAnswers(answers: AnswerMap, selectedQuestions: Question[] = questions): ScoringProfile {
-  const totals = Object.fromEntries(axes.map((axis) => [axis, 0])) as Record<Axis, number>
-  const maximums = Object.fromEntries(axes.map((axis) => [axis, 0])) as Record<Axis, number>
-  const evidence = Object.fromEntries(axes.map((axis) => [axis, 0])) as Record<Axis, number>
-  const signedEvidence: Record<Axis, number[]> = {
-    E_I: [],
-    S_N: [],
-    T_F: [],
-    J_P: [],
+export function buildProfile(answers: AnswerMap, qs: Question[] = questions): Profile {
+  const scores = {} as Record<Axis, number>
+  const confidenceByAxis = {} as Record<Axis, number>
+  for (const axis of AXES) {
+    const s = statsFor(axis, answers, qs)
+    scores[axis] = s.score
+    confidenceByAxis[axis] = s.confidence
   }
 
-  for (const question of selectedQuestions) {
-    const answer = answers[question.id] ?? 0
-    const [, rightPole] = axisPoles[question.axis]
-    const sign = question.favoredPole === rightPole ? 1 : -1
-    totals[question.axis] += answer * question.weight * sign
-    maximums[question.axis] += 3 * question.weight
-    evidence[question.axis] += Math.abs(answer) * question.weight
-    signedEvidence[question.axis].push(answer * sign)
-  }
+  const type = AXES.map((axis) => deriveLetter(axis, scores[axis])).join('') as WaifuType
+  const overallConfidence = Math.round(
+    AXES.reduce((sum, axis) => sum + confidenceByAxis[axis], 0) / AXES.length,
+  )
 
-  const scores = Object.fromEntries(
-    axes.map((axis) => {
-      const max = maximums[axis] || 1
-      return [axis, Math.round(clamp((totals[axis] / max) * 100, -100, 100))]
-    }),
-  ) as Record<Axis, number>
+  return { scores, confidenceByAxis, overallConfidence, type }
+}
 
-  const confidenceByAxis = Object.fromEntries(
-    axes.map((axis) => {
-      const max = maximums[axis] || 1
-      const answerStrength = evidence[axis] / max
-      const directionalClarity = Math.abs(totals[axis]) / max
-      const nonNeutral = signedEvidence[axis].filter((value) => value !== 0)
-      const positive = nonNeutral.filter((value) => value > 0).length
-      const negative = nonNeutral.filter((value) => value < 0).length
-      const consistency = nonNeutral.length === 0 ? 0 : Math.abs(positive - negative) / nonNeutral.length
-      return [axis, Math.round(clamp(answerStrength * 0.3 + directionalClarity * 0.45 + consistency * 0.25, 0, 1) * 100)]
-    }),
-  ) as Record<Axis, number>
-
-  const importanceByAxis = Object.fromEntries(
-    axes.map((axis) => {
-      const max = maximums[axis] || 1
-      const answerStrength = evidence[axis] / max
-      const directionalClarity = Math.abs(totals[axis]) / max
-      return [axis, 0.75 + answerStrength * 0.45 + directionalClarity * 0.8]
-    }),
-  ) as Record<Axis, number>
-
-  const confidence = Math.round(axes.reduce((sum, axis) => sum + confidenceByAxis[axis], 0) / axes.length)
-
-  return { answers, scores, confidenceByAxis, importanceByAxis, confidence }
+// A score of exactly 0 means no signal on that axis; deterministically pick
+// the left pole as a fallback so the quiz never silently defaults to INFP.
+function deriveLetter(axis: Axis, score: number): Pole {
+  const [left, right] = axisPoles[axis]
+  if (score === 0) return left
+  return score > 0 ? right : left
 }
 
 export function scoreAnswers(answers: AnswerMap): Record<Axis, number> {
-  return analyzeAnswers(answers).scores
+  return buildProfile(answers).scores
 }
 
 export function typeFromScores(scores: Record<Axis, number>): WaifuType {
-  return axes.map((axis) => {
+  return AXES.map((axis) => deriveLetter(axis, scores[axis])).join('') as WaifuType
+}
+
+// Two distance metrics serve two different jobs:
+//   rankDistance   — confidence-weighted, used to *order* characters so axes
+//                    the user cared about dominate the match.
+//   fitDistance    — confidence-independent, used to *display* a fit score so
+//                    being decisive is rewarded, not penalized.
+function rankDistance(profile: Profile, c: Character): number {
+  let dist = 0
+  for (const axis of AXES) {
+    const conf01 = profile.confidenceByAxis[axis] / 100
+    const axisWeight = 0.4 + 1.4 * conf01
+    const delta = (profile.scores[axis] - c.axisVector[axis]) / 100
+    dist += delta * delta * axisWeight * 100
+    if (axisLetter(c.type, axis) !== axisLetter(profile.type, axis)) {
+      dist += 5 + 22 * conf01
+    }
+  }
+  return dist
+}
+
+// Fit alignment in [-1, 1]: per axis, the dot of user and character (each
+// scaled to [-1, 1]). Decisive same-direction answers earn the highest fit;
+// neutral answers contribute nothing; opposite-direction answers subtract.
+function fitAlignment(profile: Profile, c: Character): number {
+  let dot = 0
+  for (const axis of AXES) {
+    const u = profile.scores[axis] / 100
+    const v = c.axisVector[axis] / 100
+    dot += u * v
+  }
+  return dot / AXES.length
+}
+
+// Map alignment to [0, 100]. Full agreement (≈+1) lands ~95-99%, opposite
+// (≈-1) lands near 0. Low-confidence runs are capped so an indecisive user
+// can't accidentally claim a 95% character.
+function fitFromAlignment(alignment: number, overallConfidence: number): number {
+  // Re-center to [0,1] but bias upward so a strong-but-realistic top match
+  // (alignment ≈ 0.7-0.8 since character vectors max out around 0.8) still
+  // reads ~95%. The 0.85 divisor maps alignment 0.85 → 100%, alignment 0 → 50%.
+  const raw = clamp((alignment / 0.85 + 1) * 50, 0, 100)
+  const cap = overallConfidence < 25 ? 55 + overallConfidence : overallConfidence < 50 ? 70 + overallConfidence / 3 : 100
+  return Math.round(clamp(Math.min(raw, cap), 0, 100))
+}
+
+export function rankCharacters(profile: Profile): CharacterMatch[] {
+  const enriched = characters.map((c, idx) => {
+    const rd = rankDistance(profile, c)
+    const align = fitAlignment(profile, c)
+    const matches = AXES.filter(
+      (a) => axisLetter(c.type, a) === axisLetter(profile.type, a),
+    ).length
+    return {
+      character: c,
+      distance: Math.round(rd * 100) / 100,
+      fit: fitFromAlignment(align, profile.overallConfidence),
+      typeMatch: Math.round((matches / AXES.length) * 100),
+      _idx: idx,
+    }
+  })
+
+  enriched.sort((a, b) => {
+    if (b.fit !== a.fit) return b.fit - a.fit
+    if (a.distance !== b.distance) return a.distance - b.distance
+    if (b.typeMatch !== a.typeMatch) return b.typeMatch - a.typeMatch
+    return a._idx - b._idx
+  })
+
+  // Spread tied fits so the displayed top-5 isn't a flat 99/99/99/99/99.
+  let prevFit = -1
+  let bumpedDown = 0
+  for (const m of enriched) {
+    if (m.fit === prevFit) {
+      bumpedDown += 1
+      m.fit = clamp(m.fit - bumpedDown, 0, 100)
+    } else {
+      prevFit = m.fit
+      bumpedDown = 0
+    }
+  }
+
+  return enriched.map(({ _idx, ...rest }) => rest)
+}
+
+export function axisScoresFrom(
+  scores: Record<Axis, number>,
+  conf?: Record<Axis, number>,
+): AxisScore[] {
+  return AXES.map((axis) => {
     const [left, right] = axisPoles[axis]
-    return scores[axis] >= 0 ? right : left
-  }).join('') as WaifuType
-}
-
-function distance(profile: ScoringProfile, character: Character, derivedType: WaifuType, selectedQuestions: Question[]): number {
-  const axisDistance = axes.reduce((sum, axis) => {
-    const delta = profile.scores[axis] - character.axisVector[axis]
-    const weight = profile.importanceByAxis[axis]
-    return sum + delta * delta * weight
-  }, 0)
-
-  const questionDistance = selectedQuestions.reduce((sum, question) => {
-    const answer = profile.answers[question.id]
-    if (typeof answer !== 'number') return sum
-
-    const [, rightPole] = axisPoles[question.axis]
-    const favoredDirection = question.favoredPole === rightPole ? 1 : -1
-    const expected = clamp((character.axisVector[question.axis] / 100) * 3 * favoredDirection, -3, 3)
-    const delta = answer - expected
-
-    return sum + delta * delta * question.weight * 48
-  }, 0)
-
-  const typePenalty = axes.reduce((sum, axis) => {
-    const expected = axisLetter(derivedType, axis)
-    const actual = axisLetter(character.type, axis)
-    return actual === expected ? sum : sum + profile.confidenceByAxis[axis] * 54
-  }, 0)
-
-  const sameTypeBonus = character.type === derivedType ? -profile.confidence * 12 : 0
-
-  return axisDistance + questionDistance + typePenalty + sameTypeBonus
-}
-
-function legacyDistance(scores: Record<Axis, number>, character: Character): number {
-  return axes.reduce((sum, axis) => {
-    const delta = scores[axis] - character.axisVector[axis]
-    return sum + delta * delta
-  }, 0)
-}
-
-export function findCharacter(scores: Record<Axis, number>): Character {
-  return [...characters].sort((a, b) => legacyDistance(scores, a) - legacyDistance(scores, b))[0]
-}
-
-function fitFromDistance(value: number): number {
-  const normalized = 1 - value / maxAxisDistance
-  return Math.round(clamp(normalized, 0, 1) * 100)
-}
-
-function typeMatchFrom(character: Character, derivedType: WaifuType): number {
-  const matches = axes.filter((axis) => axisLetter(character.type, axis) === axisLetter(derivedType, axis)).length
-  return Math.round((matches / axes.length) * 100)
-}
-
-function displayedFit(rawFit: number, confidence: number): number {
-  const blended = Math.round(rawFit * 0.72 + confidence * 0.28)
-  const confidenceCap = confidence < 20 ? 58 + confidence : confidence < 45 ? 70 + Math.round(confidence / 3) : 100
-  return Math.min(blended, confidenceCap)
-}
-
-export function rankCharacters(profile: ScoringProfile, selectedQuestions: Question[] = questions): CharacterMatch[] {
-  const derivedType = typeFromScores(profile.scores)
-
-  return characters
-    .map((character) => {
-      const matchDistance = distance(profile, character, derivedType, selectedQuestions)
-      const rawFit = fitFromDistance(matchDistance)
-      return {
-        character,
-        distance: Math.round(matchDistance),
-        fit: displayedFit(rawFit, profile.confidence),
-        typeMatch: typeMatchFrom(character, derivedType),
-      }
-    })
-    .sort((a, b) => {
-      if (b.fit !== a.fit) return b.fit - a.fit
-      if (b.typeMatch !== a.typeMatch) return b.typeMatch - a.typeMatch
-      if (a.distance !== b.distance) return a.distance - b.distance
-      return characters.indexOf(a.character) - characters.indexOf(b.character)
-    })
-}
-
-export function axisScoresFrom(scores: Record<Axis, number>, confidenceByAxis?: Record<Axis, number>): AxisScore[] {
-  return axes.map((axis) => {
-    const [left, right] = axisPoles[axis]
-    return { axis, score: scores[axis], confidence: confidenceByAxis?.[axis] ?? Math.abs(scores[axis]), left, right }
+    return {
+      axis,
+      score: scores[axis],
+      confidence: conf?.[axis] ?? Math.abs(scores[axis]),
+      left,
+      right,
+    }
   })
 }
 
-export function calculateResult(answers: AnswerMap, selectedQuestions: Question[] = questions): QuizResult {
-  const profile = analyzeAnswers(answers, selectedQuestions)
-  const topMatches = rankCharacters(profile, selectedQuestions).slice(0, 5)
-  const bestMatch = topMatches[0]
-
+export function calculateResult(answers: AnswerMap, qs: Question[] = questions): QuizResult {
+  const profile = buildProfile(answers, qs)
+  const ranked = rankCharacters(profile)
+  const top = ranked.slice(0, 5)
+  const best = top[0]
   return {
-    type: typeFromScores(profile.scores),
+    type: profile.type,
     scores: profile.scores,
     axisScores: axisScoresFrom(profile.scores, profile.confidenceByAxis),
-    character: bestMatch.character,
-    fit: bestMatch.fit,
-    confidence: profile.confidence,
-    topMatches,
+    character: best.character,
+    fit: best.fit,
+    confidence: profile.overallConfidence,
+    topMatches: top,
+  }
+}
+
+// Used by the eval harness; mirrors the production ranking path.
+export function findCharacter(scores: Record<Axis, number>): Character {
+  const profile: Profile = {
+    scores,
+    confidenceByAxis: { E_I: 50, S_N: 50, T_F: 50, J_P: 50 },
+    overallConfidence: 50,
+    type: typeFromScores(scores),
+  }
+  return rankCharacters(profile)[0].character
+}
+
+export function analyzeAnswers(answers: AnswerMap, qs: Question[] = questions) {
+  const p = buildProfile(answers, qs)
+  const importanceByAxis = AXES.reduce((acc, axis) => {
+    acc[axis] = 0.4 + 1.4 * (p.confidenceByAxis[axis] / 100)
+    return acc
+  }, {} as Record<Axis, number>)
+  return {
+    answers,
+    scores: p.scores,
+    confidenceByAxis: p.confidenceByAxis,
+    importanceByAxis,
+    confidence: p.overallConfidence,
   }
 }
