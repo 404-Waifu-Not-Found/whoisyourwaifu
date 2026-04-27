@@ -494,8 +494,8 @@ main {
   position: absolute;
   inset: -8%;
   background: var(--portrait-bg) center/cover no-repeat;
-  filter: blur(22px) saturate(1.05);
-  opacity: 0.55;
+  filter: blur(28px) saturate(1.25);
+  opacity: 1;
   z-index: 0;
   pointer-events: none;
 }
