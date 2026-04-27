@@ -6,6 +6,8 @@ import type {
   AxisScore,
   Character,
   CharacterMatch,
+  DerivedAxis,
+  DerivedPole,
   Pole,
   Question,
   QuizResult,
@@ -19,7 +21,52 @@ export const axisPoles: Record<Axis, [Pole, Pole]> = {
   J_P: ['J', 'P'],
 }
 
+// Derived "vibe" axes are linear combinations of the four MBTI axes. They
+// give the result page more dimensions to read without requiring per-character
+// data: every character's vibe is implied by their MBTI vector.
+export const derivedAxisPoles: Record<DerivedAxis, [DerivedPole, DerivedPole]> = {
+  TEMPO: ['CALM', 'WILD'],
+  IDEAL: ['GROUND', 'DREAM'],
+  MYSTIQUE: ['OPEN', 'MYST'],
+}
+
+const DERIVED_AXES = Object.keys(derivedAxisPoles) as DerivedAxis[]
+
 const AXES = Object.keys(axisPoles) as Axis[]
+
+function deriveScore(axis: DerivedAxis, mbti: Record<Axis, number>): number {
+  // Tempo: extrovert (E_I < 0) + perceiver (J_P > 0) = chaotic energy.
+  // Idealism: intuitive (S_N > 0) + feeler (T_F > 0) = dreamer.
+  // Mystique: introvert (E_I > 0) + intuitive (S_N > 0) = mysterious.
+  switch (axis) {
+    case 'TEMPO':
+      return clamp((-mbti.E_I + mbti.J_P) / 2, -100, 100)
+    case 'IDEAL':
+      return clamp((mbti.S_N + mbti.T_F) / 2, -100, 100)
+    case 'MYSTIQUE':
+      return clamp((mbti.E_I + mbti.S_N) / 2, -100, 100)
+  }
+}
+
+function deriveConfidence(axis: DerivedAxis, conf: Record<Axis, number>): number {
+  // Average confidence of the two contributing axes — a derived bar should
+  // only feel as certain as the inputs it was built from.
+  switch (axis) {
+    case 'TEMPO':
+      return (conf.E_I + conf.J_P) / 2
+    case 'IDEAL':
+      return (conf.S_N + conf.T_F) / 2
+    case 'MYSTIQUE':
+      return (conf.E_I + conf.S_N) / 2
+  }
+}
+
+// Display-only confidence transform. Ranking math still uses the raw value
+// so weighting stays accurate, but the user-visible number gets a floor so
+// even a mid-strength sheet reads as decisively-typed.
+function displayConfidence(raw: number): number {
+  return Math.round(75 + 0.25 * raw)
+}
 
 function clamp(v: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, v))
@@ -165,11 +212,17 @@ function fitAlignment(profile: Profile, c: Character): number {
 // Map alignment to [0, 100]. Anchor at 0.78 (the realistic ceiling, since
 // character axis vectors max out around 0.8) and apply a power curve so small
 // alignment differences between near-tied candidates translate into visible
-// fit gaps. Full agreement → ~99%, neutral → ~30%, opposite → ~0%.
+// fit gaps. The exponent is intentionally close to linear so mid-strength
+// sheets still read as decent matches; the ranking gap below handles spread.
 function fitFromAlignment(alignment: number, overallConfidence: number): number {
   const normalized = clamp((alignment / 0.78 + 1) / 2, 0, 1)
-  const raw = Math.pow(normalized, 1.8) * 100
-  const cap = overallConfidence < 25 ? 55 + overallConfidence : overallConfidence < 50 ? 70 + overallConfidence / 3 : 100
+  const raw = Math.pow(normalized, 1.35) * 100
+  const cap =
+    overallConfidence < 30
+      ? 78 + overallConfidence * 0.5
+      : overallConfidence < 60
+      ? 90 + overallConfidence * 0.15
+      : 100
   return Math.round(clamp(Math.min(raw, cap), 0, 100))
 }
 
@@ -196,20 +249,20 @@ export function rankCharacters(profile: Profile): CharacterMatch[] {
     return a._idx - b._idx
   })
 
-  // Lift the entire ranking so the top match always reads at least 70%.
+  // Lift the entire ranking so the top match always reads at least 80%.
   // Even an indecisive answer sheet should feel like the algorithm picked
   // *something*; lifting the whole list keeps the relative spread intact.
-  const TOP_FLOOR = 70
+  const TOP_FLOOR = 80
   if (enriched.length > 0 && enriched[0].fit < TOP_FLOOR) {
     const lift = TOP_FLOOR - enriched[0].fit
     for (const m of enriched) m.fit = clamp(m.fit + lift, 0, 100)
   }
 
-  // Enforce a visible gap between adjacent ranks. Without this, near-tied
-  // alignments collapse the top-5 into a flat band like 47/46/45/45/45. The
-  // gap shrinks as rank deepens so very low confidence runs don't underflow.
+  // Enforce a visible gap between adjacent ranks. The drop from the top to
+  // the runner-up is intentionally large so the top match looks decisively
+  // ahead; subsequent gaps shrink so the close-match band stays compact.
   for (let i = 1; i < enriched.length; i++) {
-    const minGap = i < 5 ? 2 : 1
+    const minGap = i === 1 ? 14 : i < 5 ? 3 : 2
     const ceiling = enriched[i - 1].fit - minGap
     if (enriched[i].fit > ceiling) enriched[i].fit = clamp(ceiling, 0, 100)
   }
@@ -221,16 +274,38 @@ export function axisScoresFrom(
   scores: Record<Axis, number>,
   conf?: Record<Axis, number>,
 ): AxisScore[] {
-  return AXES.map((axis) => {
+  const mbtiRows: AxisScore[] = AXES.map((axis) => {
     const [left, right] = axisPoles[axis]
+    const rawConf = conf?.[axis] ?? Math.abs(scores[axis])
     return {
       axis,
       score: scores[axis],
-      confidence: conf?.[axis] ?? Math.abs(scores[axis]),
+      confidence: displayConfidence(rawConf),
       left,
       right,
     }
   })
+
+  const confRecord =
+    conf ??
+    AXES.reduce((acc, axis) => {
+      acc[axis] = Math.abs(scores[axis])
+      return acc
+    }, {} as Record<Axis, number>)
+
+  const derivedRows: AxisScore[] = DERIVED_AXES.map((axis) => {
+    const [left, right] = derivedAxisPoles[axis]
+    return {
+      axis,
+      score: Math.round(deriveScore(axis, scores)),
+      confidence: displayConfidence(deriveConfidence(axis, confRecord)),
+      left,
+      right,
+      derived: true,
+    }
+  })
+
+  return [...mbtiRows, ...derivedRows]
 }
 
 export function calculateResult(answers: AnswerMap, qs: Question[] = questions): QuizResult {
@@ -244,7 +319,7 @@ export function calculateResult(answers: AnswerMap, qs: Question[] = questions):
     axisScores: axisScoresFrom(profile.scores, profile.confidenceByAxis),
     character: best.character,
     fit: best.fit,
-    confidence: profile.overallConfidence,
+    confidence: displayConfidence(profile.overallConfidence),
     topMatches: top,
   }
 }

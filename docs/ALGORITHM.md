@@ -4,7 +4,7 @@
 
 LPTI is an entertainment-oriented recommendation system for matching quiz answers to anime character archetypes. The model is inspired by MBTI-style binary axes, but it does not claim psychological validity. Its goal is to produce deterministic, explainable, and funny results from a randomized balanced quiz while preserving enough uncertainty information to avoid overconfident matches.
 
-The current implementation uses four preference axes, a balanced dynamic question sampler, weighted axis scoring, per-axis confidence, per-question response distance, and character ranking with type-consistency penalties. The result is a character match, a derived four-letter type, fit percentage, answer confidence, axis bars, and close alternatives.
+The current implementation uses four MBTI-style axes for typing and ranking, plus three derived "vibe" axes for display only. It has a balanced dynamic question sampler, weighted axis scoring, per-axis confidence (geometric mean of strength and clarity), and character ranking with confidence-weighted vector distance, type-letter penalties, and a same-type bonus. The result is a character match, a derived four-letter type, fit percentage, answer confidence, seven axis bars, and close alternatives.
 
 The design priority is not to discover a “true personality.” The priority is to make an answer sheet behave like a taste vector. A strong and consistent answer sheet should produce a decisive result. A neutral, noisy, or contradictory answer sheet should still produce a result, but with lower confidence and a less exaggerated fit percentage.
 
@@ -65,24 +65,30 @@ The score is clamped to `[-100, 100]`.
 
 ## 4. Confidence
 
-The model computes confidence per axis from three signals:
+Per-axis confidence combines two signals:
 
-- Answer strength: how far answers are from neutral.
-- Directional clarity: how consistently answers point toward one pole.
-- Internal consistency: whether non-neutral answers on the same axis agree with each other.
+- **Answer strength** — how far the user's answers are from neutral. `strength = Σ |answerᵢ| · weightᵢ / (3 · Σ weightᵢ)`.
+- **Directional clarity** — how unanimously the answers point at one pole. `clarity = |Σ answerᵢ · signᵢ · weightᵢ| / Σ |answerᵢ| · weightᵢ`.
+
+Both must be high for the axis to read as confident, so the two are combined as a geometric mean rather than a weighted sum:
 
 ```text
-axisConfidence =
-  30% answerStrength
-  + 45% directionalClarity
-  + 25% internalConsistency
+rawAxisConfidence = sqrt(strength · clarity) · 100
 ```
 
-Overall confidence is the average of the four axis confidence values.
+Overall raw confidence is the mean of the four raw axis confidences.
 
-Confidence is not the same as fit. A user can fit a type directionally while still having low confidence if many answers are neutral or mixed.
+This handles the common quiz failure mode where someone answers strongly on both poles of the same axis: strength is high but clarity is low, so confidence ends up correctly low instead of fake-high.
 
-This prevents a common failure mode in simple quizzes: someone answers very strongly in both directions on the same axis, the raw score cancels out near zero, but the system still treats the answer sheet as meaningful. LPTI records that contradiction and lowers confidence.
+### Display transform
+
+The displayed confidence (both per-axis and overall) is a soft-floored function of the raw value:
+
+```text
+displayConfidence(raw) = round(75 + 0.25 · raw)
+```
+
+So 0 → 75, 50 → 88, 100 → 100. This is a presentation-layer choice: even mid-strength answer sheets should read as decisively-typed rather than "no signal." The internal ranking math still uses raw confidence, so weighting and caps stay accurate.
 
 ## 5. Type Derivation
 
@@ -105,51 +111,80 @@ E_I = +, S_N = +, T_F = -, J_P = +
 Characters are ranked by a composite distance:
 
 ```text
-totalDistance =
-  weightedAxisDistance
-  + perQuestionDistance
-  + typeMismatchPenalty
-  + sameTypeBonus
+rankDistance =
+  Σ axisWeightᵢ · ((uᵢ − cᵢ) / 100)² · 100
+  + Σ letterMismatchPenaltyᵢ
+  − sameTypeBonus
 ```
 
 ### Weighted Axis Distance
 
-The model compares the user axis vector to each character axis vector. Axes with stronger confidence and answer evidence receive higher weight.
+The squared distance per axis is weighted by user confidence so the axes the user actually committed to dominate the match:
 
-### Per-Question Distance
+```text
+axisWeightᵢ = 0.5 + 1.5 · (rawAxisConfidenceᵢ / 100)
+```
 
-The model also estimates how each character would answer the selected questions based on its axis vector. This prevents two characters in the same type bucket from feeling completely identical and helps rank close alternatives.
+A fully-confident axis counts ~4× more than an uncommitted axis.
 
-This term is useful because the same final four-letter type can arise from different answer patterns. For example, two users may both derive `INFP`, but one may be strongly driven by quiet/private preferences while another is mostly driven by emotional warmth. Per-question distance gives the ranking system more texture than the final type alone.
+### Letter Mismatch Penalty
 
-### Type Mismatch Penalty
-
-If a character’s type letter differs from the user’s derived type, the model adds a penalty. The penalty is stronger when the user’s axis confidence is high.
+For each axis where the character's MBTI letter differs from the user's derived letter, the penalty `10 + 36 · confidence` is added. The penalty scales with confidence, so a confidently-typed user pays a much higher cost for typing into a near-miss character than an ambiguous one does.
 
 ### Same-Type Bonus
 
-Characters with exactly the same derived type receive a small confidence-based bonus.
+A character whose four MBTI letters all match the user's derived type gets a flat `−12` bonus on top of the per-axis math, so a canonical archetype clearly beats a near-miss with a similar vector.
 
 ## 7. Fit Percentage
 
-Raw distance is converted to a fit percentage and then blended with answer confidence:
+Fit is computed independently from rank distance: it is the *alignment* of the user's vector with the character's, run through a power curve. Decisive same-direction answers earn the highest fit; neutral answers contribute nothing; opposite-direction answers subtract.
 
 ```text
-displayedFit = 72% rawFit + 28% overallConfidence
+alignmentᵢ = (uᵢ / 100) · (cᵢ / 100)
+alignment  = mean(alignmentᵢ)        // ranges over [-1, 1]
+normalized = clamp((alignment / 0.78 + 1) / 2, 0, 1)
+rawFit     = normalizedᵏ · 100,  k = 1.35
 ```
 
-For very low-confidence answer sheets, the displayed fit is also capped. This prevents a fully neutral sheet from receiving a surprisingly high-looking match just because one character happens to be mathematically closest to the origin.
+The anchor `0.78` is the realistic ceiling — character vectors max out around 0.8, so dividing by 0.78 lets a strongly-aligned user reach near-`1.0` normalized. The exponent `k = 1.35` is intentionally close to linear so mid-strength sheets still read as decent matches; the spread step below handles separation between the top match and runners-up.
+
+### Confidence cap
+
+Fit is then capped by raw overall confidence so an indecisive sheet cannot accidentally claim a near-perfect score:
 
 ```text
-if confidence < 20:
-  displayedFit <= 58 + confidence
-if confidence < 45:
-  displayedFit <= 70 + confidence / 3
+if confidence < 30:  fit ≤ 78 + 0.5 · confidence
+if confidence < 60:  fit ≤ 90 + 0.15 · confidence
+else:                fit ≤ 100
 ```
 
-This prevents ambiguous answer sheets from showing unrealistic 99% matches and keeps all-neutral output visibly tentative.
+### Top floor and adjacent-rank gap
 
-## 8. Evaluation Harness
+After the top-5 are sorted by fit:
+
+1. **Top floor** — if the top match is below 80%, the whole list is lifted by `(80 − topFit)` so the top always reads at least 80%. The relative spread is preserved.
+2. **Adjacent gap** — each rank is forced to sit at least N points below the previous one:
+   - rank 1 → at least **14** below the top match.
+   - ranks 2–4 → at least **3** below the previous rank.
+   - rank ≥ 5 → at least **2** below the previous rank.
+
+This prevents near-tied alignments from collapsing the displayed top-5 into a flat band and gives the runner-up a visible distance from the top result, which is the dominant readability cue on the result page.
+
+## 8. Derived Display Axes
+
+The four MBTI axes drive typing and ranking. For the result page, three additional "vibe" axes are also displayed. They are not stored on characters — they are linear combinations of the four MBTI scores, so every character's vibe is implied by their existing axis vector and no per-character data is needed.
+
+```text
+TEMPO     = (-E_I + J_P) / 2     // CALM ↔ WILD
+IDEAL     = ( S_N + T_F) / 2     // GROUND ↔ DREAM
+MYSTIQUE  = ( E_I + S_N) / 2     // OPEN ↔ MYST
+```
+
+(Sign convention: `E_I < 0` means extrovert, `J_P > 0` means perceiver, etc.)
+
+The derived confidence is the mean of the two contributing MBTI axis confidences, then run through the same display transform from §4. Derived axes are display-only: they do not feed back into ranking or type derivation.
+
+## 9. Evaluation Harness
 
 The project includes:
 
@@ -170,22 +205,22 @@ It prints legacy and enhanced matches, fit, confidence, and top three alternativ
 
 The expected behavior is:
 
-- strong profiles should have high confidence and high fit.
-- mixed profiles should remain directionally correct but show lower confidence.
-- noisy profiles should usually preserve the intended type while reducing certainty.
-- contradictory profiles should not pretend to be precise.
-- neutral profiles should produce low confidence even though a deterministic fallback result still exists.
+- strong profiles → top fit ~97%, runner-up ~83%, third ~80%, confidence 100%.
+- mixed and noisy profiles → top fit floored at 80%, runner-up at 66%, third at 63%, confidence ~89–92%.
+- contradictory and neutral profiles → top fit still 80% (top floor), runner-up 66%, but confidence floored at 75% to honestly signal the lack of information.
 
-## 9. Limitations
+The fit numbers are deliberately templated for non-strong sheets: the top floor and the 14-point runner-up gap mean that any sheet without strong alignment lands on the same `80 / 66 / 63 / 60 / 57` shape. The confidence number, not the fit number, is what carries the "how decisive was your sheet" information.
+
+## 10. Limitations
 
 - The model is not psychological science.
 - Character typing is approximate and fandom-inspired.
 - The output is deterministic, but the selected question set is randomized per attempt.
 - External character art depends on third-party availability.
 
-## 10. Future Improvements
+## 11. Future Improvements
 
-- Add explicit character trait vectors independent of MBTI axes.
+- Promote the derived "vibe" axes to first-class data so characters can disagree with the MBTI-implied vibe (e.g. an introverted character with a deliberately chaotic tempo).
 - Add anti-repetition logic for similar questions.
 - Add more fake-profile tests with noisy and contradictory inputs.
 - Add community voting to tune character vectors.
