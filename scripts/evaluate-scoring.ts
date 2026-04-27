@@ -107,6 +107,23 @@ function compareProfile(name: string, answers: AnswerMap) {
   }
 }
 
+function randomAnswerFor(seed: number): AnswerMap {
+  // Tiny seeded LCG so the eval is reproducible across runs but each row
+  // gets a distinct 32-question profile.
+  let state = (seed * 2654435761) >>> 0
+  const next = () => {
+    state = (state * 1664525 + 1013904223) >>> 0
+    return state / 0xffffffff
+  }
+  const values: AnswerValue[] = [-3, -2, -1, 0, 1, 2, 3]
+  return Object.fromEntries(
+    questions.map((question) => [
+      question.id,
+      values[Math.floor(next() * values.length)] as AnswerValue,
+    ]),
+  )
+}
+
 const rows = [
   ...types.map((type) => compareProfile(`${type} strong`, answerFor(type, 3))),
   ...types.map((type) => compareProfile(`${type} mixed`, mixedAnswerFor(type))),
@@ -114,6 +131,12 @@ const rows = [
   ...types.slice(0, 8).map((type) => compareProfile(`${type} contradictory`, contradictoryAnswerFor(type))),
   ...types.slice(8).map((type) => compareProfile(`${type} partial EI/SN`, partialAxisAnswerFor(type, ['E_I', 'S_N']))),
   compareProfile('all neutral', neutralAnswerFor()),
+  ...Array.from({ length: 12 }, (_, i) => compareProfile(`random #${i + 1}`, randomAnswerFor(i + 1))),
 ]
 
 console.table(rows)
+
+const topFits = rows.map((r) => Number.parseInt(r.fit, 10))
+const minTop = Math.min(...topFits)
+const below70 = topFits.filter((f) => f < 70).length
+console.log(`\nTop-fit floor check — min: ${minTop}%, rows below 70%: ${below70} / ${rows.length}`)

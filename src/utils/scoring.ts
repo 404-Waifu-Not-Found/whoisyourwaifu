@@ -196,6 +196,15 @@ export function rankCharacters(profile: Profile): CharacterMatch[] {
     return a._idx - b._idx
   })
 
+  // Lift the entire ranking so the top match always reads at least 70%.
+  // Even an indecisive answer sheet should feel like the algorithm picked
+  // *something*; lifting the whole list keeps the relative spread intact.
+  const TOP_FLOOR = 70
+  if (enriched.length > 0 && enriched[0].fit < TOP_FLOOR) {
+    const lift = TOP_FLOOR - enriched[0].fit
+    for (const m of enriched) m.fit = clamp(m.fit + lift, 0, 100)
+  }
+
   // Enforce a visible gap between adjacent ranks. Without this, near-tied
   // alignments collapse the top-5 into a flat band like 47/46/45/45/45. The
   // gap shrinks as rank deepens so very low confidence runs don't underflow.
