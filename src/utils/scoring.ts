@@ -168,7 +168,7 @@ function fitAlignment(profile: Profile, c: Character): number {
 // fit gaps. Full agreement → ~99%, neutral → ~30%, opposite → ~0%.
 function fitFromAlignment(alignment: number, overallConfidence: number): number {
   const normalized = clamp((alignment / 0.78 + 1) / 2, 0, 1)
-  const raw = Math.pow(normalized, 1.4) * 100
+  const raw = Math.pow(normalized, 1.8) * 100
   const cap = overallConfidence < 25 ? 55 + overallConfidence : overallConfidence < 50 ? 70 + overallConfidence / 3 : 100
   return Math.round(clamp(Math.min(raw, cap), 0, 100))
 }
@@ -196,17 +196,13 @@ export function rankCharacters(profile: Profile): CharacterMatch[] {
     return a._idx - b._idx
   })
 
-  // Spread tied fits so the displayed top-5 isn't a flat 99/99/99/99/99.
-  let prevFit = -1
-  let bumpedDown = 0
-  for (const m of enriched) {
-    if (m.fit === prevFit) {
-      bumpedDown += 1
-      m.fit = clamp(m.fit - bumpedDown, 0, 100)
-    } else {
-      prevFit = m.fit
-      bumpedDown = 0
-    }
+  // Enforce a visible gap between adjacent ranks. Without this, near-tied
+  // alignments collapse the top-5 into a flat band like 47/46/45/45/45. The
+  // gap shrinks as rank deepens so very low confidence runs don't underflow.
+  for (let i = 1; i < enriched.length; i++) {
+    const minGap = i < 5 ? 2 : 1
+    const ceiling = enriched[i - 1].fit - minGap
+    if (enriched[i].fit > ceiling) enriched[i].fit = clamp(ceiling, 0, 100)
   }
 
   return enriched.map(({ _idx, ...rest }) => rest)
