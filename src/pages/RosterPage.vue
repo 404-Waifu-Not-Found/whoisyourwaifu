@@ -29,6 +29,9 @@ const rosterEyebrow = computed(() => labels.value.rosterEyebrow.replace('{charac
           :alt="text(character.name)"
           loading="lazy"
         />
+        <div v-else class="roster-portrait roster-portrait-fallback" aria-hidden="true">
+          {{ text(character.name).slice(0, 1).toUpperCase() }}
+        </div>
         <div class="roster-type">{{ character.type }}</div>
         <h2>{{ text(character.name) }}</h2>
         <p>{{ text(character.source) }}</p>

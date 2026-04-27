@@ -930,6 +930,16 @@ main {
   background: var(--accent);
 }
 
+.roster-portrait-fallback {
+  display: grid;
+  place-items: center;
+  color: white;
+  font-size: clamp(4rem, 10vw, 6.5rem);
+  font-weight: 1000;
+  letter-spacing: -0.04em;
+  text-shadow: 3px 3px 0 var(--ink);
+}
+
 .roster-card h2 {
   margin: 18px 0 6px;
   font-size: 1.45rem;
