@@ -19,7 +19,12 @@ const traits = computed(() => props.result.character.traits[locale.value])
       <strong>{{ result.type }}</strong>
     </div>
     <div class="result-identity">
-      <div class="character-sigil" aria-hidden="true">
+      <div
+        class="character-sigil"
+        :class="{ 'portrait-frame': result.character.portrait }"
+        :style="result.character.portrait ? { '--portrait-bg': `url('${result.character.portrait.url}')` } : undefined"
+        aria-hidden="true"
+      >
         <img
           v-if="result.character.portrait"
           :src="result.character.portrait.url"

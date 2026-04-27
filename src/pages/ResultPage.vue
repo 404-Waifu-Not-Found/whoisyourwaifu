@@ -43,12 +43,17 @@ function retake() {
       <h2 id="close-matches-title">{{ labels.closeMatches }}</h2>
       <div class="close-match-grid">
         <article v-for="match in result.topMatches.slice(1)" :key="match.character.id" class="close-match">
-          <img
+          <div
             v-if="match.character.portrait"
-            :src="match.character.portrait.url"
-            :alt="text(match.character.name)"
-            loading="lazy"
-          />
+            class="close-match-portrait portrait-frame"
+            :style="{ '--portrait-bg': `url('${match.character.portrait.url}')` }"
+          >
+            <img
+              :src="match.character.portrait.url"
+              :alt="text(match.character.name)"
+              loading="lazy"
+            />
+          </div>
           <div>
             <strong>{{ text(match.character.name) }}</strong>
             <span>{{ text(match.character.source) }} · {{ match.character.type }} · {{ match.fit }}%</span>

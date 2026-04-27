@@ -324,9 +324,9 @@ const portraits: Record<string, NonNullable<Character['portrait']>> = {
     sourceUrl: 'https://myanimelist.net/character/94/Asuka_Langley_Souryuu',
   },
   'atri': {
-    url: 'https://myanimelist.net/images/characters/8/484876.jpg',
-    sourceName: portraitSource,
-    sourceUrl: 'https://myanimelist.net/character/134223/Atri',
+    url: 'https://lain.bgm.tv/pic/crt/l/bf/05/74255_crt_UBbIQ.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/74255',
   },
   'awa-subaru': {
     url: 'https://myanimelist.net/images/characters/16/512878.jpg',
@@ -639,9 +639,9 @@ const portraits: Record<string, NonNullable<Character['portrait']>> = {
     sourceUrl: 'https://myanimelist.net/character/232147/Umiri_Yahata',
   },
   'yamada-ryo': {
-    url: 'https://myanimelist.net/images/characters/13/331974.jpg',
-    sourceName: portraitSource,
-    sourceUrl: 'https://myanimelist.net/character/140567/Ryou_Yamada',
+    url: 'https://lain.bgm.tv/pic/crt/l/63/6b/87974_crt_qkKzi.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/87974',
   },
   'yanami-anna': {
     url: 'https://myanimelist.net/images/characters/16/542560.jpg',

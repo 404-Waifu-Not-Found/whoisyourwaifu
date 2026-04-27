@@ -22,13 +22,17 @@ const rosterEyebrow = computed(() => labels.value.rosterEyebrow.replace('{charac
         class="roster-card"
         :class="`palette-${character.palette}`"
       >
-        <img
+        <div
           v-if="character.portrait"
-          class="roster-portrait"
-          :src="character.portrait.url"
-          :alt="text(character.name)"
-          loading="lazy"
-        />
+          class="roster-portrait portrait-frame"
+          :style="{ '--portrait-bg': `url('${character.portrait.url}')` }"
+        >
+          <img
+            :src="character.portrait.url"
+            :alt="text(character.name)"
+            loading="lazy"
+          />
+        </div>
         <div v-else class="roster-portrait roster-portrait-fallback" aria-hidden="true">
           {{ text(character.name).slice(0, 1).toUpperCase() }}
         </div>

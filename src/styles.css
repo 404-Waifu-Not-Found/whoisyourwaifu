@@ -476,12 +476,33 @@ main {
 }
 
 .character-sigil img,
-.roster-portrait {
+.roster-portrait img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   object-position: center;
-  background: var(--accent);
+}
+
+.portrait-frame {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.portrait-frame::before {
+  content: '';
+  position: absolute;
+  inset: -8%;
+  background: var(--portrait-bg) center/cover no-repeat;
+  filter: blur(22px) saturate(1.05);
+  opacity: 0.55;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.portrait-frame > img {
+  position: relative;
+  z-index: 1;
 }
 
 .result-identity h1 {
@@ -656,14 +677,20 @@ main {
   box-shadow: 3px 3px 0 var(--ink);
 }
 
-.close-match img {
+.close-match-portrait {
   width: 64px;
   height: 78px;
   border: 2px solid var(--ink);
   border-radius: 8px;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.close-match-portrait img {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   object-position: center;
-  background: var(--accent);
 }
 
 .close-match strong,
