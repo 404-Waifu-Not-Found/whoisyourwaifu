@@ -433,11 +433,6 @@ const portraits: Record<string, NonNullable<Character['portrait']>> = {
     sourceName: portraitSource,
     sourceUrl: 'https://myanimelist.net/character/9272/Rin_Kagamine',
   },
-  'kaguya-chojikuu': {
-    url: 'https://myanimelist.net/images/characters/13/582080.jpg',
-    sourceName: portraitSource,
-    sourceUrl: 'https://myanimelist.net/character/96353/Kaguya',
-  },
   'kaltsit': {
     url: 'https://myanimelist.net/images/characters/8/493343.jpg',
     sourceName: portraitSource,
@@ -544,9 +539,9 @@ const portraits: Record<string, NonNullable<Character['portrait']>> = {
     sourceUrl: 'https://myanimelist.net/character/161357/Mahiro_Oyama',
   },
   'phoebe': {
-    url: 'https://myanimelist.net/images/characters/3/529852.jpg',
-    sourceName: portraitSource,
-    sourceUrl: 'https://myanimelist.net/character/238411/Phoebe',
+    url: 'https://lain.bgm.tv/pic/crt/l/2f/f3/167269_crt_L1aep.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/167269',
   },
   'phrolova': {
     url: 'https://myanimelist.net/images/characters/4/604311.jpg',
@@ -609,9 +604,9 @@ const portraits: Record<string, NonNullable<Character['portrait']>> = {
     sourceUrl: 'https://myanimelist.net/character/231741/Sakiko_Togawa',
   },
   'tokai-teio': {
-    url: 'https://myanimelist.net/images/characters/4/574443.jpg',
-    sourceName: portraitSource,
-    sourceUrl: 'https://myanimelist.net/character/190816/Kitasan_Black',
+    url: 'https://lain.bgm.tv/pic/crt/l/6a/83/50578_crt_Y9JG9.jpg',
+    sourceName: bangumiPortraitSource,
+    sourceUrl: 'https://bgm.tv/character/50578',
   },
   'tokisaki-kurumi': {
     url: 'https://myanimelist.net/images/characters/8/310255.jpg',
