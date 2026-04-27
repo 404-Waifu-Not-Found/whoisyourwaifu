@@ -65,7 +65,7 @@ function previous() {
         <span>{{ labels.neutral }}</span>
         <span>{{ labels.agree }}</span>
       </div>
-      <div class="scale-grid" role="group" aria-label="Answer scale">
+      <div class="scale-grid" role="group" :aria-label="labels.answerScaleLabel">
         <button
           v-for="value in values"
           :key="value"

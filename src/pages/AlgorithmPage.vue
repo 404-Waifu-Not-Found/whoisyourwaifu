@@ -19,7 +19,7 @@ const { labels } = useI18n()
       <h2>{{ labels.algorithmSamplingHeading }}</h2>
       <p>{{ labels.algorithmSections[0].body }}</p>
       <figure class="paper-figure">
-        <svg viewBox="0 0 760 210" role="img" aria-label="Balanced question sampling graph">
+        <svg viewBox="0 0 760 210" role="img" :aria-label="labels.algorithmFigure1Alt">
           <line x1="80" y1="170" x2="710" y2="170" />
           <line x1="80" y1="32" x2="80" y2="170" />
           <g class="bars">
@@ -55,7 +55,7 @@ const { labels } = useI18n()
         <span>{{ labels.algorithmConfidenceFormula }}</span>
       </div>
       <figure class="paper-figure">
-        <svg viewBox="0 0 760 240" role="img" aria-label="Axis vector radar graph">
+        <svg viewBox="0 0 760 240" role="img" :aria-label="labels.algorithmFigure2Alt">
           <polygon points="380,30 620,120 380,210 140,120" class="radar-grid" />
           <line x1="380" y1="30" x2="380" y2="210" />
           <line x1="140" y1="120" x2="620" y2="120" />
@@ -85,7 +85,7 @@ const { labels } = useI18n()
         <span>{{ labels.algorithmFormula }}</span>
       </div>
       <figure class="paper-figure">
-        <svg viewBox="0 0 760 220" role="img" aria-label="Composite distance diagram">
+        <svg viewBox="0 0 760 220" role="img" :aria-label="labels.algorithmFigure3Alt">
           <defs>
             <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
               <path d="M0,0 L0,6 L8,3 z" />
