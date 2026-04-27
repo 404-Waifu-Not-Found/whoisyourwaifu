@@ -287,6 +287,371 @@ const portraits: Record<string, NonNullable<Character['portrait']>> = {
     sourceName: portraitSource,
     sourceUrl: 'https://myanimelist.net/character/79995/Astolfo',
   },
+  'aisaka-taiga': {
+    url: 'https://myanimelist.net/images/characters/11/514086.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/12064/Taiga_Aisaka',
+  },
+  'akiyama-mio': {
+    url: 'https://myanimelist.net/images/characters/11/48547.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/19566/Mio_Akiyama',
+  },
+  'alya-kujou': {
+    url: 'https://myanimelist.net/images/characters/5/536830.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/195230/Alisa_Mikhailovna_Kujou',
+  },
+  'amane-suzuha': {
+    url: 'https://myanimelist.net/images/characters/3/148223.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/35255/Suzuha_Amane',
+  },
+  'amiya': {
+    url: 'https://myanimelist.net/images/characters/12/493319.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/190811/Amiya',
+  },
+  'arima-kana': {
+    url: 'https://myanimelist.net/images/characters/6/503733.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/188038/Kana_Arima',
+  },
+  'asuka-langley': {
+    url: 'https://myanimelist.net/images/characters/12/79465.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/94/Asuka_Langley_Souryuu',
+  },
+  'atri': {
+    url: 'https://myanimelist.net/images/characters/8/484876.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/134223/Atri',
+  },
+  'awa-subaru': {
+    url: 'https://myanimelist.net/images/characters/16/512878.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/230308/Subaru_Awa',
+  },
+  'ayachi-nene': {
+    url: 'https://myanimelist.net/images/characters/7/403775.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/135031/Nene_Ayachi',
+  },
+  'ayanami-rei': {
+    url: 'https://myanimelist.net/images/characters/11/314932.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/86/Rei_Ayanami',
+  },
+  'azusagawa-kaede': {
+    url: 'https://myanimelist.net/images/characters/7/366710.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/151021/Kaede_Azusagawa',
+  },
+  'cartethyia': {
+    url: 'https://myanimelist.net/images/characters/13/603755.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/277870/Cartethyia',
+  },
+  'chihaya-anon': {
+    url: 'https://myanimelist.net/images/characters/15/512384.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/227731/Anon_Chihaya',
+  },
+  'chitanda-eru': {
+    url: 'https://myanimelist.net/images/characters/11/514101.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/55133/Eru_Chitanda',
+  },
+  'cirno': {
+    url: 'https://myanimelist.net/images/characters/2/491558.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/24891/Cirno',
+  },
+  'elaina': {
+    url: 'https://myanimelist.net/images/characters/7/449163.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/199593/Elaina',
+  },
+  'elysia': {
+    url: 'https://myanimelist.net/images/characters/4/501079.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/223977/Elysia',
+  },
+  'firefly': {
+    url: 'https://myanimelist.net/images/characters/8/552678.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/250452/Firefly',
+  },
+  'furina': {
+    url: 'https://myanimelist.net/images/characters/4/549296.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/248828/Furina_de_Fontaine',
+  },
+  'furukawa-nagisa': {
+    url: 'https://myanimelist.net/images/characters/3/300961.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/4604/Nagisa_Furukawa',
+  },
+  'haibara-ai': {
+    url: 'https://myanimelist.net/images/characters/14/146141.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/1743/Ai_Haibara',
+  },
+  'hakurei-reimu': {
+    url: 'https://myanimelist.net/images/characters/14/567865.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/5443/Reimu_Hakurei',
+  },
+  'hatsune-miku': {
+    url: 'https://myanimelist.net/images/characters/15/356707.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/161342/Miku_Hatsune',
+  },
+  'hoshino-ruby': {
+    url: 'https://myanimelist.net/images/characters/5/496454.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/186921/Ruby_Hoshino',
+  },
+  'ijichi-nijika': {
+    url: 'https://myanimelist.net/images/characters/16/491305.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/206277/Nijika_Ijichi',
+  },
+  'inaba-meguru': {
+    url: 'https://myanimelist.net/images/characters/13/385646.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/135030/Meguru_Inaba',
+  },
+  'izumi-konata': {
+    url: 'https://myanimelist.net/images/characters/13/39208.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/2169/Konata_Izumi',
+  },
+  'kagamine-rin': {
+    url: 'https://myanimelist.net/images/characters/2/35115.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/9272/Rin_Kagamine',
+  },
+  'kaguya-chojikuu': {
+    url: 'https://myanimelist.net/images/characters/13/582080.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/96353/Kaguya',
+  },
+  'kaltsit': {
+    url: 'https://myanimelist.net/images/characters/8/493343.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/218235/Kaltsit',
+  },
+  'kaname-madoka': {
+    url: 'https://myanimelist.net/images/characters/6/139487.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/37832/Madoka_Kaname',
+  },
+  'kasugano-sora': {
+    url: 'https://myanimelist.net/images/characters/10/101109.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/33221/Sora_Kasugano',
+  },
+  'kato-megumi': {
+    url: 'https://myanimelist.net/images/characters/6/326632.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/90181/Megumi_Katou',
+  },
+  'kinomoto-sakura': {
+    url: 'https://myanimelist.net/images/characters/5/86417.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/2671/Sakura_Kinomoto',
+  },
+  'kita-ikuyo': {
+    url: 'https://myanimelist.net/images/characters/10/509914.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/206279/Ikuyo_Kita',
+  },
+  'kitashirakawa-tamako': {
+    url: 'https://myanimelist.net/images/characters/11/188208.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/74850/Tamako_Kitashirakawa',
+  },
+  'kousaka-kirino': {
+    url: 'https://myanimelist.net/images/characters/8/101419.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/24544/Kirino_Kousaka',
+  },
+  'kusanagi-nene': {
+    url: 'https://myanimelist.net/images/characters/14/563320.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/205198/Nene_Kusanagi',
+  },
+  'kushima-kamome': {
+    url: 'https://myanimelist.net/images/characters/11/589646.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/207200/Kamome_Kushima',
+  },
+  'luo-tianyi': {
+    url: 'https://myanimelist.net/images/characters/10/206867.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/78727/Tianyi_Luo',
+  },
+  'matikanetannhauser': {
+    url: 'https://myanimelist.net/images/characters/7/574454.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/190815/Matikanetannhauser',
+  },
+  'misumi-uika': {
+    url: 'https://myanimelist.net/images/characters/9/516504.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/231743/Uika_Misumi',
+  },
+  'miyazono-kaori': {
+    url: 'https://myanimelist.net/images/characters/14/269375.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/69411/Kaori_Miyazono',
+  },
+  'mortis': {
+    url: 'https://myanimelist.net/images/characters/16/515789.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/231742/Mutsumi_Wakaba',
+  },
+  'murasame': {
+    url: 'https://myanimelist.net/images/characters/8/195079.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/76930/Murasame',
+  },
+  'nagasaki-soyo': {
+    url: 'https://myanimelist.net/images/characters/7/512381.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/227734/Soyo_Nagasaki',
+  },
+  'nakano-azusa': {
+    url: 'https://myanimelist.net/images/characters/15/86736.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/21173/Azusa_Nakano',
+  },
+  'nishikigi-chisato': {
+    url: 'https://myanimelist.net/images/characters/5/486674.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/204621/Chisato_Nishikigi',
+  },
+  'nukumizu-kaju': {
+    url: 'https://myanimelist.net/images/characters/4/552228.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/213641/Kaju_Nukumizu',
+  },
+  'oyama-mahiro': {
+    url: 'https://myanimelist.net/images/characters/15/413882.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/161357/Mahiro_Oyama',
+  },
+  'phoebe': {
+    url: 'https://myanimelist.net/images/characters/3/529852.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/238411/Phoebe',
+  },
+  'phrolova': {
+    url: 'https://myanimelist.net/images/characters/4/604311.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/277774/Phrolova',
+  },
+  'reze': {
+    url: 'https://myanimelist.net/images/characters/10/618421.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/174751/Reze',
+  },
+  'runami-yachiyo': {
+    url: 'https://myanimelist.net/images/characters/12/610329.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/282384/Yachiyo_Runami',
+  },
+  'sakagami-tomoyo': {
+    url: 'https://myanimelist.net/images/characters/2/34293.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/4603/Tomoyo_Sakagami',
+  },
+  'sakurajima-mai': {
+    url: 'https://myanimelist.net/images/characters/2/366639.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/118739/Mai_Sakurajima',
+  },
+  'shiina-mayuri': {
+    url: 'https://myanimelist.net/images/characters/4/131329.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/35253/Mayuri_Shiina',
+  },
+  'shiina-taki': {
+    url: 'https://myanimelist.net/images/characters/3/512383.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/227735/Taki_Shiina',
+  },
+  'shirai-kuroko': {
+    url: 'https://myanimelist.net/images/characters/12/101104.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/17017/Kuroko_Shirai',
+  },
+  'shorekeeper': {
+    url: 'https://myanimelist.net/images/characters/8/603486.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/277661/The_Shorekeeper',
+  },
+  'tachibana-kanade': {
+    url: 'https://myanimelist.net/images/characters/10/289337.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/22369/Kanade_Tachibana',
+  },
+  'takamatsu-tomori': {
+    url: 'https://myanimelist.net/images/characters/9/512382.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/227730/Tomori_Takamatsu',
+  },
+  'togawa-sakiko': {
+    url: 'https://myanimelist.net/images/characters/2/515788.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/231741/Sakiko_Togawa',
+  },
+  'tokai-teio': {
+    url: 'https://myanimelist.net/images/characters/4/574443.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/190816/Kitasan_Black',
+  },
+  'tokisaki-kurumi': {
+    url: 'https://myanimelist.net/images/characters/8/310255.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/70069/Kurumi_Tokisaki',
+  },
+  'tomori-nao': {
+    url: 'https://myanimelist.net/images/characters/10/288020.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/122211/Nao_Tomori',
+  },
+  'tomotake-yoshino': {
+    url: 'https://myanimelist.net/images/characters/13/505508.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/184951/Yoshino_Tomotake',
+  },
+  'wakaba-mutsumi': {
+    url: 'https://myanimelist.net/images/characters/16/515789.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/231742/Mutsumi_Wakaba',
+  },
+  'yahata-umiri': {
+    url: 'https://myanimelist.net/images/characters/9/516421.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/232147/Umiri_Yahata',
+  },
+  'yamada-ryo': {
+    url: 'https://myanimelist.net/images/characters/13/331974.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/140567/Ryou_Yamada',
+  },
+  'yanami-anna': {
+    url: 'https://myanimelist.net/images/characters/16/542560.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/213637/Anna_Yanami',
+  },
+  'yuigahama-yui': {
+    url: 'https://myanimelist.net/images/characters/2/332632.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/67069/Yui_Yuigahama',
+  },
 }
 
 function vectorFromType(type: WaifuType, intensity = 72): Record<Axis, number> {
