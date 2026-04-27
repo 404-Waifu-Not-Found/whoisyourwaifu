@@ -282,6 +282,11 @@ const portraits: Record<string, NonNullable<Character['portrait']>> = {
     sourceName: portraitSource,
     sourceUrl: 'https://myanimelist.net/character/835/Misa_Amane',
   },
+  astolfo: {
+    url: 'https://myanimelist.net/images/characters/12/321733.jpg',
+    sourceName: portraitSource,
+    sourceUrl: 'https://myanimelist.net/character/79995/Astolfo',
+  },
 }
 
 function vectorFromType(type: WaifuType, intensity = 72): Record<Axis, number> {
@@ -373,6 +378,7 @@ const starterCharacters: Character[] = [
   character('nezuko-kamado', 'Nezuko Kamado', '灶门祢豆子', 'Demon Slayer', 'ISFP', ['Protective', 'Gentle', 'Instinctive'], ['保护欲', '温柔', '直觉型'], 'You value wordless warmth, protective instincts, and emotions that do not need a monologue.', '你珍视不用台词也能传达的温暖、保护本能，以及不需要独白的情感。', 'rose', 63),
   character('ryuko-matoi', 'Ryuko Matoi', '缠流子', 'Kill la Kill', 'ESTP', ['Rebellious', 'Direct', 'Explosive'], ['叛逆', '直球', '爆发力'], 'Your match is raw momentum, zero patience, and the kind of entrance that damages scenery.', '你的匹配结果是纯粹冲劲、零耐心，以及会破坏布景的登场方式。', 'crimson', 70),
   character('misa-amane', 'Misa Amane', '弥海砂', 'Death Note', 'ESFP', ['Dramatic', 'Devoted', 'Spotlight-ready'], ['戏剧化', '投入', '聚光灯体质'], 'You want big feelings, camera-ready chaos, and affection with dangerous production value.', '你想要大份情绪、镜头感混沌，以及制作规格很危险的好感。', 'magenta', 66),
+  character('astolfo', 'Astolfo', '阿斯托尔福', 'Fate/Apocrypha', 'ENFP', ['Pink ponytail', 'Trap-class menace', 'Pure sunshine'], ['粉色双马尾', '陷阱级威胁', '纯净阳光'], 'Result reads female. Source code says otherwise. Your XP just rolled a critical and the wiki link is open in another tab — do not look it up at work.', '结果显示是女孩子。源代码表示并不是。你的XP刚刚暴击，百科页面已经在另一标签页打开——上班别点开。', 'sakura', 70),
 ]
 
 interface ExtraCharacterSource {

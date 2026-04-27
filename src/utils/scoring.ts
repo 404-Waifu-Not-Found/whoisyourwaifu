@@ -131,15 +131,21 @@ export function typeFromScores(scores: Record<Axis, number>): WaifuType {
 //                    being decisive is rewarded, not penalized.
 function rankDistance(profile: Profile, c: Character): number {
   let dist = 0
+  let mismatchedAxes = 0
   for (const axis of AXES) {
     const conf01 = profile.confidenceByAxis[axis] / 100
-    const axisWeight = 0.4 + 1.4 * conf01
+    const axisWeight = 0.5 + 1.5 * conf01
     const delta = (profile.scores[axis] - c.axisVector[axis]) / 100
     dist += delta * delta * axisWeight * 100
     if (axisLetter(c.type, axis) !== axisLetter(profile.type, axis)) {
-      dist += 5 + 22 * conf01
+      dist += 10 + 36 * conf01
+      mismatchedAxes += 1
     }
   }
+  // Reward an exact MBTI match — characters that hit all four letters of the
+  // user's derived type should clearly beat near-miss types when the rest of
+  // the vector is similar.
+  if (mismatchedAxes === 0) dist -= 12
   return dist
 }
 
@@ -156,14 +162,13 @@ function fitAlignment(profile: Profile, c: Character): number {
   return dot / AXES.length
 }
 
-// Map alignment to [0, 100]. Full agreement (≈+1) lands ~95-99%, opposite
-// (≈-1) lands near 0. Low-confidence runs are capped so an indecisive user
-// can't accidentally claim a 95% character.
+// Map alignment to [0, 100]. Anchor at 0.78 (the realistic ceiling, since
+// character axis vectors max out around 0.8) and apply a power curve so small
+// alignment differences between near-tied candidates translate into visible
+// fit gaps. Full agreement → ~99%, neutral → ~30%, opposite → ~0%.
 function fitFromAlignment(alignment: number, overallConfidence: number): number {
-  // Re-center to [0,1] but bias upward so a strong-but-realistic top match
-  // (alignment ≈ 0.7-0.8 since character vectors max out around 0.8) still
-  // reads ~95%. The 0.85 divisor maps alignment 0.85 → 100%, alignment 0 → 50%.
-  const raw = clamp((alignment / 0.85 + 1) * 50, 0, 100)
+  const normalized = clamp((alignment / 0.78 + 1) / 2, 0, 1)
+  const raw = Math.pow(normalized, 1.4) * 100
   const cap = overallConfidence < 25 ? 55 + overallConfidence : overallConfidence < 50 ? 70 + overallConfidence / 3 : 100
   return Math.round(clamp(Math.min(raw, cap), 0, 100))
 }
