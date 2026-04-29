@@ -766,11 +766,23 @@ function runAnalysis(): MetricFinding[] {
       scores: AXES.map((a) => p.result.scores[a]).join(','),
     })),
   )
-  if (collapsedToSame >= collapsePatterns.length - 2) {
+  // The collapse to a single character is acceptable when the result is
+  // honestly labeled as low-confidence/low-fit. Only flag when the
+  // collapsed result is still *presented as confident* to the user.
+  const collapsedAndConfident = collapsePatterns.filter(
+    (p) =>
+      p.result.character.id === collapsePatterns[0].result.character.id &&
+      (p.result.fit >= 50 || p.result.confidence >= 30),
+  ).length
+  if (collapsedAndConfident >= collapsePatterns.length - 2) {
     findings.push({
       section: '15',
-      message: `${collapsedToSame}/${collapsePatterns.length} ambiguous-input patterns collapse to the SAME top character (${collapsePatterns[0].result.character.name.en}). deriveLetter() defaults score=0 to the left pole, sending every {0,0,0,0} sheet to "ESTJ" → Tomoyo Sakagami.`,
+      message: `${collapsedAndConfident}/${collapsePatterns.length} ambiguous-input patterns collapse to the SAME top character AND still display fit ≥ 50% or confidence ≥ 30% — the user can't tell their input was unreadable.`,
     })
+  } else if (collapsedToSame >= collapsePatterns.length - 2) {
+    console.log(
+      `Note: ${collapsedToSame}/${collapsePatterns.length} ambiguous patterns still pick the same top character, but it now reads as low-confidence so the UI can surface the ambiguity.`,
+    )
   }
 
   // -- 16. Adjacency cost --------------------------------------------------

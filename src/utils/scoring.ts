@@ -63,8 +63,16 @@ function deriveConfidence(axis: DerivedAxis, conf: Record<Axis, number>): number
 
 // Display-only confidence transform. Ranking math still uses the raw value
 // so weighting stays accurate, but the user-visible number gets a floor so
-// even a mid-strength sheet reads as decisively-typed.
-function displayConfidence(raw: number): number {
+// even a mid-strength sheet reads as decisively-typed. Two early exits keep
+// the floor from lying:
+//   - lowVariance sheets (flat-button user) get a sharply attenuated number
+//   - raw confidence below 30 ramps linearly from 0 instead of jumping to
+//     the 75 baseline; this catches contradictory-answer sheets where every
+//     per-axis confidence cancels to 0 even though the answer values vary.
+// The 30-point handoff is continuous: both branches yield ~83 at raw=30.
+function displayConfidence(raw: number, lowVariance = false): number {
+  if (lowVariance) return Math.round(raw * 0.3)
+  if (raw < 30) return Math.round(raw * 2.75)
   return Math.round(75 + 0.25 * raw)
 }
 
@@ -124,6 +132,38 @@ interface Profile {
   confidenceByAxis: Record<Axis, number>
   overallConfidence: number
   type: WaifuType
+  // True when the user gave essentially the same answer to every question
+  // (range ≤ 1 across all answered questions). The signal is unreadable, so
+  // ranking and display logic skip the floor that would otherwise hide it.
+  lowVariance: boolean
+}
+
+// An axis with very low confidence carries no usable signal; ranking treats
+// the user's letter on that axis as "unknown" instead of forcing the
+// score=0 → left-pole fallback to influence character ordering.
+const AXIS_AMBIGUITY_THRESHOLD = 20
+
+function isAxisAmbiguous(confidence: number): boolean {
+  return confidence < AXIS_AMBIGUITY_THRESHOLD
+}
+
+// A sheet where every answer is the same value (or the spread is ≤ 1) is
+// almost certainly a satisficing user — we can't infer preference from a
+// flat button. Used to short-circuit the 80% fit floor.
+function detectLowVariance(answers: AnswerMap, qs: Question[]): boolean {
+  const values: number[] = []
+  for (const q of qs) {
+    const a = answers[q.id]
+    if (typeof a === 'number') values.push(a)
+  }
+  if (values.length < 8) return false
+  let min = values[0]
+  let max = values[0]
+  for (const v of values) {
+    if (v < min) min = v
+    if (v > max) max = v
+  }
+  return max - min <= 1
 }
 
 export function emptyAnswers(): AnswerMap {
@@ -151,8 +191,9 @@ export function buildProfile(answers: AnswerMap, qs: Question[] = questions): Pr
   const overallConfidence = Math.round(
     AXES.reduce((sum, axis) => sum + confidenceByAxis[axis], 0) / AXES.length,
   )
+  const lowVariance = detectLowVariance(answers, qs)
 
-  return { scores, confidenceByAxis, overallConfidence, type }
+  return { scores, confidenceByAxis, overallConfidence, type, lowVariance }
 }
 
 // A score of exactly 0 means no signal on that axis; deterministically pick
@@ -179,8 +220,16 @@ export function typeFromScores(scores: Record<Axis, number>): WaifuType {
 function rankDistance(profile: Profile, c: Character): number {
   let dist = 0
   let mismatchedAxes = 0
+  let confidentAxes = 0
   for (const axis of AXES) {
-    const conf01 = profile.confidenceByAxis[axis] / 100
+    const axisConf = profile.confidenceByAxis[axis]
+    // Ambiguous axis: the user gave us no usable signal here. Skip both the
+    // distance contribution and the letter-mismatch penalty so unread axes
+    // don't bias the ranking toward whichever pole deriveLetter happened to
+    // pick (it always falls left on score=0).
+    if (isAxisAmbiguous(axisConf)) continue
+    confidentAxes += 1
+    const conf01 = axisConf / 100
     const axisWeight = 0.5 + 1.5 * conf01
     const delta = (profile.scores[axis] - c.axisVector[axis]) / 100
     dist += delta * delta * axisWeight * 100
@@ -191,8 +240,10 @@ function rankDistance(profile: Profile, c: Character): number {
   }
   // Reward an exact MBTI match — characters that hit all four letters of the
   // user's derived type should clearly beat near-miss types when the rest of
-  // the vector is similar.
-  if (mismatchedAxes === 0) dist -= 12
+  // the vector is similar. Require at least two confident axes so a sheet
+  // where almost everything is unread doesn't hand a free bonus to every
+  // character that happens to share the score=0 fallback letters.
+  if (mismatchedAxes === 0 && confidentAxes >= 2) dist -= 12
   return dist
 }
 
@@ -249,11 +300,13 @@ export function rankCharacters(profile: Profile): CharacterMatch[] {
     return a._idx - b._idx
   })
 
-  // Lift the entire ranking so the top match always reads at least 80%.
-  // Even an indecisive answer sheet should feel like the algorithm picked
-  // *something*; lifting the whole list keeps the relative spread intact.
+  // Lift the entire ranking so the top match always reads at least 80% —
+  // but only when the user actually gave us readable signal. A satisficing
+  // sheet (everything ±0/±1) or a sheet with confidence below 30 is unread,
+  // so promoting it to 80% would hide that fact from the user.
   const TOP_FLOOR = 80
-  if (enriched.length > 0 && enriched[0].fit < TOP_FLOOR) {
+  const liftAllowed = !profile.lowVariance && profile.overallConfidence >= 30
+  if (liftAllowed && enriched.length > 0 && enriched[0].fit < TOP_FLOOR) {
     const lift = TOP_FLOOR - enriched[0].fit
     for (const m of enriched) m.fit = clamp(m.fit + lift, 0, 100)
   }
@@ -273,6 +326,7 @@ export function rankCharacters(profile: Profile): CharacterMatch[] {
 export function axisScoresFrom(
   scores: Record<Axis, number>,
   conf?: Record<Axis, number>,
+  lowVariance = false,
 ): AxisScore[] {
   const mbtiRows: AxisScore[] = AXES.map((axis) => {
     const [left, right] = axisPoles[axis]
@@ -280,7 +334,7 @@ export function axisScoresFrom(
     return {
       axis,
       score: scores[axis],
-      confidence: displayConfidence(rawConf),
+      confidence: displayConfidence(rawConf, lowVariance),
       left,
       right,
     }
@@ -298,7 +352,7 @@ export function axisScoresFrom(
     return {
       axis,
       score: Math.round(deriveScore(axis, scores)),
-      confidence: displayConfidence(deriveConfidence(axis, confRecord)),
+      confidence: displayConfidence(deriveConfidence(axis, confRecord), lowVariance),
       left,
       right,
       derived: true,
@@ -316,10 +370,10 @@ export function calculateResult(answers: AnswerMap, qs: Question[] = questions):
   return {
     type: profile.type,
     scores: profile.scores,
-    axisScores: axisScoresFrom(profile.scores, profile.confidenceByAxis),
+    axisScores: axisScoresFrom(profile.scores, profile.confidenceByAxis, profile.lowVariance),
     character: best.character,
     fit: best.fit,
-    confidence: displayConfidence(profile.overallConfidence),
+    confidence: displayConfidence(profile.overallConfidence, profile.lowVariance),
     topMatches: top,
   }
 }
@@ -331,6 +385,7 @@ export function findCharacter(scores: Record<Axis, number>): Character {
     confidenceByAxis: { E_I: 50, S_N: 50, T_F: 50, J_P: 50 },
     overallConfidence: 50,
     type: typeFromScores(scores),
+    lowVariance: false,
   }
   return rankCharacters(profile)[0].character
 }
