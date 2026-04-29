@@ -567,7 +567,259 @@ function runAnalysis(): MetricFinding[] {
     }
   }
 
+  // -- 10. Per-question impact audit ---------------------------------------
+  // For each of the 48 questions, set ONLY that question to +3 (rest 0) and
+  // record which axis moved and in which direction. A correctly-tagged
+  // question must move its declared axis in the direction of its declared
+  // favoredPole. Mislabeled axis or pole shows up as an off-axis swing or
+  // a sign reversal.
+  const flagsByQuestion: Array<Record<string, string>> = []
+  let mislabeled = 0
+  let leakedToOtherAxis = 0
+  for (const q of questions) {
+    const answers: AnswerMap = Object.fromEntries(
+      questions.map((other) => [other.id, other.id === q.id ? (3 as AnswerValue) : (0 as AnswerValue)]),
+    )
+    const scores = scoreAnswers(answers)
+    const movedAxis = AXES.reduce((best, a) => (Math.abs(scores[a]) > Math.abs(scores[best]) ? a : best), 'E_I' as Axis)
+    const onAxisScore = scores[q.axis]
+    const expectedRight = q.favoredPole === axisPolesRight(q.axis)
+    const movedTowardRight = onAxisScore > 0
+    const polarityOk = expectedRight ? movedTowardRight : !movedTowardRight
+    const offAxisLeak = AXES.filter((a) => a !== q.axis && Math.abs(scores[a]) > 0.5).length
+    if (movedAxis !== q.axis) leakedToOtherAxis += 1
+    if (!polarityOk || onAxisScore === 0) mislabeled += 1
+    if (!polarityOk || movedAxis !== q.axis || offAxisLeak > 0) {
+      flagsByQuestion.push({
+        id: q.id,
+        axis: q.axis,
+        favoredPole: q.favoredPole,
+        weight: String(q.weight),
+        'on-axis Δ': String(onAxisScore),
+        'top-moved axis': movedAxis,
+        'polarity ok': polarityOk ? 'yes' : 'NO',
+        'off-axis leak': String(offAxisLeak),
+      })
+    }
+  }
+  console.log('\n10) Per-question impact audit (only flagged rows shown):')
+  if (flagsByQuestion.length === 0) {
+    console.log('All 48 questions move their declared axis in the declared direction with no off-axis leakage.')
+  } else {
+    console.table(flagsByQuestion)
+    findings.push({
+      section: '10',
+      message: `${flagsByQuestion.length} question(s) show inconsistent labeling or off-axis leakage; ${mislabeled} have wrong polarity, ${leakedToOtherAxis} move a non-declared axis more than their own.`,
+    })
+  }
+
+  // -- 11. Per-question discriminative power -------------------------------
+  // Within each axis, how much does each question move the score when set to
+  // +3 alone? Outliers (very weak vs very strong impact) are calibration
+  // candidates. We expect impact ∝ weight (since scoring divides by total
+  // axis weight, a weight-1.4 question should move the score ~2x a
+  // weight-0.7 question).
+  const impactRows = questions.map((q) => {
+    const answers: AnswerMap = Object.fromEntries(
+      questions.map((other) => [other.id, other.id === q.id ? (3 as AnswerValue) : (0 as AnswerValue)]),
+    )
+    const score = scoreAnswers(answers)[q.axis]
+    return {
+      id: q.id,
+      axis: q.axis,
+      pole: q.favoredPole,
+      weight: q.weight,
+      'on-axis score': score,
+      'impact / weight': Math.round((Math.abs(score) / q.weight) * 100) / 100,
+    }
+  })
+  // Group by axis, compute mean/min/max impact per axis.
+  console.log('\n11) Per-question impact-per-weight by axis (variance reveals miscalibration):')
+  console.table(
+    AXES.map((axis) => {
+      const rows = impactRows.filter((r) => r.axis === axis)
+      const ratios = rows.map((r) => r['impact / weight'])
+      const min = Math.min(...ratios)
+      const max = Math.max(...ratios)
+      const mean = Math.round((ratios.reduce((a, x) => a + x, 0) / ratios.length) * 100) / 100
+      return {
+        axis,
+        n: rows.length,
+        'mean impact/weight': mean,
+        'min impact/weight': min,
+        'max impact/weight': max,
+        'spread (max-min)': Math.round((max - min) * 100) / 100,
+      }
+    }),
+  )
+
+  // -- 12. Strength gradient ------------------------------------------------
+  // For each type, answer all questions aligned at strength 1, 2, 3. Fit
+  // should be monotone increasing with strength; if it plateaus at the
+  // floor (80%) for both 1 and 2, the floor is squashing the gradient.
+  console.log('\n12) Fit gradient by answer strength (mean across 16 types):')
+  console.table(
+    [1, 2, 3].map((s) => {
+      const samples = types.map((t) => calculateResult(answerFor(t, s as AnswerValue)))
+      const avg = (xs: number[]) => Math.round(xs.reduce((a, x) => a + x, 0) / xs.length)
+      return {
+        'answer strength': `±${s}`,
+        'avg fit': avg(samples.map((x) => x.fit)),
+        'avg confidence': avg(samples.map((x) => x.confidence)),
+        'top1 type-match': `${samples.filter((x) => x.character.type === x.type).length}/${types.length}`,
+      }
+    }),
+  )
+  // Flag if ±1 and ±2 both report identical fit (floor is squashing).
+  const f1 = calculateResult(answerFor('INTJ', 1)).fit
+  const f2 = calculateResult(answerFor('INTJ', 2)).fit
+  if (f1 === f2) {
+    findings.push({
+      section: '12',
+      message: `INTJ aligned at ±1 and ±2 both report ${f1}% fit — the 80% floor flattens the strength gradient so users can't tell weak from medium answers apart.`,
+    })
+  }
+
+  // -- 13. Larger perturbations --------------------------------------------
+  // Top-1 stability when 1 / 2 / 4 / 8 / 16 answers are flipped. Reveals the
+  // break-even point at which the algorithm changes its mind.
+  console.log('\n13) Top-1 stability vs perturbation size (5 seeds × 16 types):')
+  const perturbRows = [1, 2, 4, 8, 16].map((flips) => {
+    let stable = 0
+    let total = 0
+    for (const t of types) {
+      const baseline = calculateResult(answerFor(t, 3)).character.id
+      for (let s = 1; s <= 5; s += 1) {
+        total += 1
+        if (calculateResult(perturbedAnswerFor(t, s + flips * 100, flips)).character.id === baseline) stable += 1
+      }
+    }
+    return { 'flips applied': flips, 'top1 stable': `${stable}/${total}`, 'stability': pct(stable, total) }
+  })
+  console.table(perturbRows)
+
+  // -- 14. Character coverage ----------------------------------------------
+  // Across all the synthetic profiles fired during this eval, count distinct
+  // top-1 characters. Reveals reachability — characters that the algorithm
+  // never elects under any pattern are effectively dead weight.
+  const reachedTop1 = new Set<string>()
+  const everInTop5 = new Set<string>()
+  const winsByCharacter: Record<string, number> = {}
+  const sample: AnswerMap[] = [
+    ...types.map((t) => answerFor(t, 3)),
+    ...types.map((t) => answerFor(t, 2)),
+    ...types.map((t) => answerFor(t, 1)),
+    ...types.map((t) => mixedAnswerFor(t)),
+    ...types.map((t) => noisyAnswerFor(t)),
+    ...types.map((t) => lukewarmAnswerFor(t)),
+    ...types.flatMap((t) => AXES.map((a) => flippedOneAxisAnswerFor(t, a))),
+    ...Array.from({ length: 64 }, (_, i) => randomAnswerFor(i + 1)),
+  ]
+  for (const a of sample) {
+    const r = calculateResult(a)
+    reachedTop1.add(r.character.id)
+    winsByCharacter[r.character.id] = (winsByCharacter[r.character.id] ?? 0) + 1
+    for (const m of r.topMatches) everInTop5.add(m.character.id)
+  }
+  const totalChars = characters.length
+  console.log(`\n14) Character coverage across ${sample.length} synthetic profiles:`)
+  console.log(`Headline: ${reachedTop1.size}/${totalChars} characters ever appear top-1; ${everInTop5.size}/${totalChars} ever appear in top-5.`)
+  const unreachable = characters.filter((c) => !everInTop5.has(c.id))
+  if (unreachable.length > 0) {
+    console.log(`Unreachable in top-5 (${unreachable.length}):`)
+    console.table(unreachable.map((c) => ({ id: c.id, name: c.name.en, type: c.type })).slice(0, 20))
+    findings.push({
+      section: '14',
+      message: `${unreachable.length}/${totalChars} characters never appear in any top-5 across ${sample.length} diverse synthetic profiles. Likely dominated by another same-type character with a similar but slightly stronger axisVector.`,
+    })
+  }
+  // Also show the top-10 most-elected characters — concentration of wins.
+  const winList = Object.entries(winsByCharacter).sort((a, b) => b[1] - a[1]).slice(0, 10)
+  console.log(`Top-10 most-elected characters across the ${sample.length} profiles:`)
+  console.table(
+    winList.map(([id, n]) => {
+      const c = characters.find((x) => x.id === id)!
+      return { id, name: c.name.en, type: c.type, wins: n, share: pct(n, sample.length) }
+    }),
+  )
+
+  // -- 15. Zero-score collapse magnitude -----------------------------------
+  // Among the patterns we fire, how many produce derived type ESTJ via the
+  // score-0-falls-left fallback? This measures the magnitude of the bug
+  // where contradictory / all-neutral / all-+3 / all--3 all collapse to one
+  // character.
+  const collapsePatterns: Array<{ name: string; result: ReturnType<typeof calculateResult> }> = [
+    { name: 'all neutral', result: calculateResult(neutralAnswerFor()) },
+    { name: 'all +3', result: calculateResult(biasAnswerFor(3)) },
+    { name: 'all -3', result: calculateResult(biasAnswerFor(-3)) },
+    ...types.map((t) => ({ name: `${t} contradictory`, result: calculateResult(contradictoryAnswerFor(t)) })),
+  ]
+  const collapsedToSame = collapsePatterns.filter((p) => p.result.character.id === collapsePatterns[0].result.character.id).length
+  console.log('\n15) Zero-score collapse: patterns producing scores ≈ {0,0,0,0}:')
+  console.table(
+    collapsePatterns.map((p) => ({
+      pattern: p.name,
+      'derived type': p.result.type,
+      'top character': `${p.result.character.name.en} (${p.result.character.type})`,
+      fit: `${p.result.fit}%`,
+      confidence: `${p.result.confidence}%`,
+      scores: AXES.map((a) => p.result.scores[a]).join(','),
+    })),
+  )
+  if (collapsedToSame >= collapsePatterns.length - 2) {
+    findings.push({
+      section: '15',
+      message: `${collapsedToSame}/${collapsePatterns.length} ambiguous-input patterns collapse to the SAME top character (${collapsePatterns[0].result.character.name.en}). deriveLetter() defaults score=0 to the left pole, sending every {0,0,0,0} sheet to "ESTJ" → Tomoyo Sakagami.`,
+    })
+  }
+
+  // -- 16. Adjacency cost --------------------------------------------------
+  // For a strong INTJ profile, what is the fit & rank gap to characters at
+  // letter-distance 1, 2, 3, 4 from INTJ? Should grow monotonically with
+  // letter distance — if it doesn't, type matching is weakly enforced.
+  const refType: WaifuType = 'INTJ'
+  const refResult = calculateResult(answerFor(refType, 3))
+  function letterDistance(a: WaifuType, b: WaifuType): number {
+    let d = 0
+    for (let i = 0; i < 4; i += 1) if (a[i] !== b[i]) d += 1
+    return d
+  }
+  const byDistance: Record<number, { count: number; bestFit: number; worstFit: number; bestRank: number }> = {}
+  refResult.topMatches.forEach(() => {})
+  // Use the full ranking (not just top-5).
+  // We can recover it by re-sorting all characters via a fresh calculateResult
+  // — calculateResult only returns top-5, so reproduce by walking characters.
+  const allRankings = characters.map((c) => {
+    const partial = calculateResult(answerFor(refType, 3)).topMatches.find((m) => m.character.id === c.id)
+    if (partial) return { id: c.id, type: c.type, fit: partial.fit, inTop5: true }
+    // For non-top-5 characters we don't get fit but we get type-distance.
+    return { id: c.id, type: c.type, fit: -1, inTop5: false }
+  })
+  for (const row of allRankings) {
+    const d = letterDistance(refType, row.type)
+    const slot = (byDistance[d] = byDistance[d] ?? { count: 0, bestFit: -1, worstFit: 101, bestRank: 99 })
+    slot.count += 1
+    if (row.fit >= 0) {
+      if (row.fit > slot.bestFit) slot.bestFit = row.fit
+      if (row.fit < slot.worstFit) slot.worstFit = row.fit
+    }
+  }
+  console.log(`\n16) Adjacency cost from INTJ (top-5 fit by letter distance):`)
+  console.table(
+    [0, 1, 2, 3, 4].map((d) => ({
+      'letter distance': d,
+      'characters at this distance': byDistance[d]?.count ?? 0,
+      'best fit (top-5)': byDistance[d]?.bestFit === -1 ? 'none in top-5' : byDistance[d]?.bestFit,
+      'worst fit (top-5)': byDistance[d]?.worstFit === 101 ? 'none in top-5' : byDistance[d]?.worstFit,
+    })),
+  )
+
   return findings
+}
+
+// Helper: look up the right pole of an axis without re-importing axisPoles.
+function axisPolesRight(axis: Axis): Pole {
+  return ({ E_I: 'I', S_N: 'N', T_F: 'F', J_P: 'P' } as Record<Axis, Pole>)[axis]
 }
 
 const findings = runAnalysis()
@@ -585,3 +837,7 @@ console.log('- Replace the fixed 14%/3%/2% minGap chain (scoring.ts:263-268) wit
 console.log('- Penalize overrepresented MBTI classes in rankCharacters: divide distance bonus by sqrt(class size) so rare types are not crowded out.')
 console.log('- Make fitAlignment confidence-aware so a decisive single-axis sheet beats a lukewarm 4-axis sheet (currently fitAlignment ignores confidence).')
 console.log('- Detect satisficing (all answers same sign/value) and surface as low-confidence rather than confident-neutral.')
+console.log('- Score-0 fallback: deriveLetter (scoring.ts:160-164) sends every zero-score axis to the LEFT pole, so ambiguous sheets all collapse to ESTJ. Treat low-confidence axes as "unknown" or randomize/jitter the type, then surface the uncertainty.')
+console.log('- Strength gradient: ±1 and ±2 aligned sheets currently report identical fit; widen the displayed band so users feel rewarded for decisive answers.')
+console.log('- Per-question audit: §10 catches mislabeled axis/pole tags; §11 surfaces miscalibrated weights. Re-balance any flagged questions before further algo work.')
+console.log('- Character coverage: §14 lists characters that never appear in any top-5. Inspect their axisVectors — they are likely shadowed by another same-type character.')
