@@ -300,24 +300,40 @@ export function rankCharacters(profile: Profile): CharacterMatch[] {
     return a._idx - b._idx
   })
 
-  // Lift the entire ranking so the top match always reads at least 80% —
-  // but only when the user actually gave us readable signal. A satisficing
-  // sheet (everything ±0/±1) or a sheet with confidence below 30 is unread,
-  // so promoting it to 80% would hide that fact from the user.
-  const TOP_FLOOR = 80
+  // Lift the entire ranking so the top match always reads at least the
+  // confidence-graduated floor. A satisficing sheet (everything ±0/±1) or
+  // a sheet with confidence below 30 reads as unread; a mid-confidence
+  // sheet reads as mid; only a fully-confident sheet earns the original
+  // 80% floor. Lifting the whole list keeps the relative spread intact.
   const liftAllowed = !profile.lowVariance && profile.overallConfidence >= 30
-  if (liftAllowed && enriched.length > 0 && enriched[0].fit < TOP_FLOOR) {
-    const lift = TOP_FLOOR - enriched[0].fit
-    for (const m of enriched) m.fit = clamp(m.fit + lift, 0, 100)
+  if (liftAllowed && enriched.length > 0) {
+    const TOP_FLOOR_CEILING = 80
+    const TOP_FLOOR_BASE = 50
+    const floor = Math.round(
+      TOP_FLOOR_BASE + (TOP_FLOOR_CEILING - TOP_FLOOR_BASE) * (profile.overallConfidence / 100),
+    )
+    if (enriched[0].fit < floor) {
+      const lift = floor - enriched[0].fit
+      for (const m of enriched) m.fit = clamp(m.fit + lift, 0, 100)
+    }
   }
 
-  // Enforce a visible gap between adjacent ranks. The drop from the top to
-  // the runner-up is intentionally large so the top match looks decisively
-  // ahead; subsequent gaps shrink so the close-match band stays compact.
+  // Enforce a visible gap between adjacent ranks. Two factors shrink the
+  // gap from its base value:
+  //   confFactor — low-confidence sheets show a tight cluster (we don't
+  //                want a 14% drop on a sheet we can barely read).
+  //   tightness  — when the underlying raw-fit gap is already smaller than
+  //                the base gap, two genuinely-near matches stay close so
+  //                small input perturbations don't flip a 14% display gap.
+  const confFactor = 0.3 + 0.7 * (profile.overallConfidence / 100)
   for (let i = 1; i < enriched.length; i++) {
-    const minGap = i === 1 ? 14 : i < 5 ? 3 : 2
+    const baseGap = i === 1 ? 14 : i < 5 ? 3 : 2
+    const scaledGap = baseGap * confFactor
+    const rawGap = enriched[i - 1].fit - enriched[i].fit
+    const tightness = clamp(1 - rawGap / Math.max(scaledGap, 0.1), 0, 1)
+    const minGap = scaledGap * (1 - tightness * 0.7)
     const ceiling = enriched[i - 1].fit - minGap
-    if (enriched[i].fit > ceiling) enriched[i].fit = clamp(ceiling, 0, 100)
+    if (enriched[i].fit > ceiling) enriched[i].fit = Math.round(clamp(ceiling, 0, 100))
   }
 
   return enriched.map(({ _idx, ...rest }) => rest)

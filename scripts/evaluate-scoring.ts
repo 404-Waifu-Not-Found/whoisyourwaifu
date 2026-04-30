@@ -502,27 +502,34 @@ function runAnalysis(): MetricFinding[] {
     ['ESTP', 'ESFP'],
   ]
   console.log('\n7) Near-tie fit gaps (50/50 mix between two types):')
-  console.table(
-    tiePairs.map(([a, b]) => {
-      const result = calculateResult(nearTieAnswerFor(a, b))
-      const [t1, t2, t3] = result.topMatches
-      const distGap = t2 ? Math.round((t2.distance - t1.distance) * 100) / 100 : 0
-      const fitGap = t2 ? t1.fit - t2.fit : 0
-      return {
-        mix: `${a}/${b}`,
-        derived: result.type,
-        '1st': `${t1.character.name.en} ${t1.fit}%`,
-        '2nd': t2 ? `${t2.character.name.en} ${t2.fit}%` : '—',
-        '3rd': t3 ? `${t3.character.name.en} ${t3.fit}%` : '—',
-        'fit gap 1→2': `${fitGap}%`,
-        'distance gap 1→2': distGap,
-      }
-    }),
-  )
-  findings.push({
-    section: '7',
-    message: 'Near-tie fit gaps are dominated by the enforced 14% top-to-runner-up minGap (scoring.ts:265), not by underlying distance — small mix changes can flip the displayed leader by 14%.',
+  const tieRows = tiePairs.map(([a, b]) => {
+    const result = calculateResult(nearTieAnswerFor(a, b))
+    const [t1, t2, t3] = result.topMatches
+    const distGap = t2 ? Math.round((t2.distance - t1.distance) * 100) / 100 : 0
+    const fitGap = t2 ? t1.fit - t2.fit : 0
+    return {
+      mix: `${a}/${b}`,
+      derived: result.type,
+      '1st': `${t1.character.name.en} ${t1.fit}%`,
+      '2nd': t2 ? `${t2.character.name.en} ${t2.fit}%` : '—',
+      '3rd': t3 ? `${t3.character.name.en} ${t3.fit}%` : '—',
+      'fit gap 1→2': `${fitGap}%`,
+      'distance gap 1→2': distGap,
+      _fitGap: fitGap,
+      _distGap: distGap,
+    }
   })
+  console.table(tieRows.map(({ _fitGap, _distGap, ...row }) => row))
+  // Flag only when fit gaps still over-represent near-ties (≥ 12% display gap
+  // on a < 5-unit underlying distance gap means the gap enforcement is again
+  // dominating the visual).
+  const overstatedTies = tieRows.filter((r) => r._fitGap >= 12 && Math.abs(r._distGap) < 5).length
+  if (overstatedTies > 0) {
+    findings.push({
+      section: '7',
+      message: `${overstatedTies}/${tieRows.length} near-tie mixes still display a ≥12% fit gap on a <5-unit distance gap — the minGap enforcement is over-stating the leader.`,
+    })
+  }
 
   // -- 8. Single-axis dominance --------------------------------------------
   // When only one axis is answered, does the algorithm still confidently
@@ -844,12 +851,7 @@ if (findings.length === 0) {
 }
 
 console.log('\n=== Candidate algorithm improvements (deferred to follow-up) ===')
-console.log('- Drop the unconditional 80% fit floor (scoring.ts:255-259) when overallConfidence < 30; let weak sheets read as weak.')
-console.log('- Replace the fixed 14%/3%/2% minGap chain (scoring.ts:263-268) with a confidence-derived gap so near-ties stay visually close.')
 console.log('- Penalize overrepresented MBTI classes in rankCharacters: divide distance bonus by sqrt(class size) so rare types are not crowded out.')
 console.log('- Make fitAlignment confidence-aware so a decisive single-axis sheet beats a lukewarm 4-axis sheet (currently fitAlignment ignores confidence).')
-console.log('- Detect satisficing (all answers same sign/value) and surface as low-confidence rather than confident-neutral.')
-console.log('- Score-0 fallback: deriveLetter (scoring.ts:160-164) sends every zero-score axis to the LEFT pole, so ambiguous sheets all collapse to ESTJ. Treat low-confidence axes as "unknown" or randomize/jitter the type, then surface the uncertainty.')
-console.log('- Strength gradient: ±1 and ±2 aligned sheets currently report identical fit; widen the displayed band so users feel rewarded for decisive answers.')
-console.log('- Per-question audit: §10 catches mislabeled axis/pole tags; §11 surfaces miscalibrated weights. Re-balance any flagged questions before further algo work.')
-console.log('- Character coverage: §14 lists characters that never appear in any top-5. Inspect their axisVectors — they are likely shadowed by another same-type character.')
+console.log('- Vector dispersion: §14 lists characters that never appear in any top-5. They share an axisVector cluster with same-type peers; widen the per-character nudge in vectorFromType (or hand-tune their vectors) so each character has a niche.')
+console.log('- Type-display honesty: deriveLetter still defaults score=0 axes to the left pole, so ambiguous sheets show "ESTJ" as the derived type. Ranking math now ignores those axes (P1) but the visible 4-letter type is still misleading; consider showing "?" for axes with confidence < 20.')
