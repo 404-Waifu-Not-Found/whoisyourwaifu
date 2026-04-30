@@ -248,16 +248,23 @@ function rankDistance(profile: Profile, c: Character): number {
 }
 
 // Fit alignment in [-1, 1]: per axis, the dot of user and character (each
-// scaled to [-1, 1]). Decisive same-direction answers earn the highest fit;
-// neutral answers contribute nothing; opposite-direction answers subtract.
+// scaled to [-1, 1]) weighted by per-axis confidence so the user's strongly
+//-felt axes count more. Decisive same-direction answers earn the highest
+// fit; neutral answers contribute nothing; opposite-direction answers
+// subtract. Confidence weighting matches rankDistance, so the displayed
+// fit is consistent with the metric the sort uses.
 function fitAlignment(profile: Profile, c: Character): number {
   let dot = 0
+  let weightSum = 0
   for (const axis of AXES) {
+    const conf01 = profile.confidenceByAxis[axis] / 100
+    const axisWeight = 0.5 + 1.5 * conf01
     const u = profile.scores[axis] / 100
     const v = c.axisVector[axis] / 100
-    dot += u * v
+    dot += u * v * axisWeight
+    weightSum += axisWeight
   }
-  return dot / AXES.length
+  return weightSum > 0 ? dot / weightSum : 0
 }
 
 // Map alignment to [0, 100]. Anchor at 0.78 (the realistic ceiling, since
@@ -293,9 +300,19 @@ export function rankCharacters(profile: Profile): CharacterMatch[] {
     }
   })
 
+  // Sort by rankDistance with an epsilon — within a small distance window
+  // (sub-unit gap), fall back to fit so a single answer flip doesn't trade
+  // the dominant character for a near-equivalent one and shift the visible
+  // result. Outside the window, distance wins so lower-magnitude same-class
+  // peers can finally appear when they are genuinely the closest match
+  // (the §14 unreachable-character fix). Previously fit was primary, which
+  // let the dot product reward higher-magnitude characters indefinitely.
+  const DISTANCE_EPSILON = 3
   enriched.sort((a, b) => {
+    const distGap = a.distance - b.distance
+    if (Math.abs(distGap) > DISTANCE_EPSILON) return distGap
     if (b.fit !== a.fit) return b.fit - a.fit
-    if (a.distance !== b.distance) return a.distance - b.distance
+    if (a.distance !== b.distance) return distGap
     if (b.typeMatch !== a.typeMatch) return b.typeMatch - a.typeMatch
     return a._idx - b._idx
   })

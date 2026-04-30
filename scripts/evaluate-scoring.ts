@@ -851,7 +851,6 @@ if (findings.length === 0) {
 }
 
 console.log('\n=== Candidate algorithm improvements (deferred to follow-up) ===')
-console.log('- Penalize overrepresented MBTI classes in rankCharacters: divide distance bonus by sqrt(class size) so rare types are not crowded out.')
-console.log('- Make fitAlignment confidence-aware so a decisive single-axis sheet beats a lukewarm 4-axis sheet (currently fitAlignment ignores confidence).')
-console.log('- Vector dispersion: §14 lists characters that never appear in any top-5. They share an axisVector cluster with same-type peers; widen the per-character nudge in vectorFromType (or hand-tune their vectors) so each character has a niche.')
+console.log('- Vector dispersion (data, not algo): the 5 remaining unreachable characters share an axisVector cluster with same-type peers — inaba-meguru and murasame have IDENTICAL vectors. Add a small id-hash nudge to vectorFromType (and extraAxisVector) so no two characters collide, or hand-tune the duplicates.')
+console.log('- Penalize overrepresented MBTI classes in rankCharacters: divide distance bonus by sqrt(class size) so rare types (ISFP n=5, ESFP n=6) compete more evenly with crowded ones (ENFP n=18).')
 console.log('- Type-display honesty: deriveLetter still defaults score=0 axes to the left pole, so ambiguous sheets show "ESTJ" as the derived type. Ranking math now ignores those axes (P1) but the visible 4-letter type is still misleading; consider showing "?" for axes with confidence < 20.')
